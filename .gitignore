@@ -1,0 +1,34 @@
+# --- secrets: never commit ---
+.env
+.env.*
+*.pem
+*.key
+**/secrets*
+**/*secret*
+**/credentials.json
+**/api_keys*
+**/token*.json
+
+# --- telemetry: raw, unredacted exports never leave the machine ---
+telemetry/raw/
+telemetry/**/raw_*.json
+*.sqlite
+*.sqlite3
+session-store.db*
+data.db*
+
+# --- python ---
+**/__pycache__/
+*.pyc
+*.pyo
+.Python
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- os / editor ---
+.DS_Store
+.idea/
+.vscode/
