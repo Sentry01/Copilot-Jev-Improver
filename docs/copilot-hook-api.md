@@ -32,7 +32,7 @@ The events this repo uses:
 | Event | Fires | Can it block? | What we use it for |
 |---|---|---|---|
 | `sessionStart` | session begins | no | inject the gate policy summary as context |
-| `preToolUse` | before each tool runs | **yes — allow / deny / ask** | the enforcement point for all 15 gates |
+| `preToolUse` | before each tool runs | **yes — allow / deny / ask** | the enforcement point for all 16 gates |
 | `postToolUseFailure` | after a tool fails | no, but can inject context | feed `retry-worth-it` guidance back to the model |
 | `agentStop` | main agent finishes a turn | **yes — force another turn** | `verification-sufficient`, opt-in |
 
@@ -327,19 +327,82 @@ Distilled, for anyone writing a gate hook:
 
 ---
 
-## 9. What is still unverified
+## 9. What has been observed, and what is still unverified
 
 Honesty about the edges of this document:
 
-- **`${PLUGIN_ROOT}` expansion inside `args`** (as opposed to inside `bash`) is
-  assumed to work and is not yet confirmed against a live plugin install. If it
-  does not expand, the `exec` + `args` form in `hooks.json` must fall back to a
-  `bash` entry.
-- **Aggregate gate latency is unmeasured.** Individual gates are ~300–500ms in
-  fixture mode. Real per-session overhead across a full session, and therefore
-  whether the gates are net-positive on wall-clock time, has not been measured.
-  This is the main risk to the whole approach and is deliberately listed as an
-  open question rather than assumed away.
+### Observed against a running CLI
+
+The plugin-loading and hook-expansion behaviour below was observed on macOS with
+`/opt/homebrew/bin/copilot`. The first scratch expansion run logged `Starting
+Copilot CLI: 1.0.88-1`; subsequent scratch-deny and repo-plugin runs logged
+`Starting Copilot CLI: 1.0.89-0`, which is also what `copilot --version`
+reported after the probes.
+
+- **`${PLUGIN_ROOT}` expands inside `args` for command hooks.** This was tested
+  with a session-scoped scratch plugin mounted via `--plugin-dir`. Its hook used
+  the same shape as this repo:
+
+  ```json
+  {
+    "type": "command",
+    "exec": "python3",
+    "args": ["${PLUGIN_ROOT}/hooks/probe.py", "${PLUGIN_ROOT}", "preToolUse-args"]
+  }
+  ```
+
+  Prompt-mode runs invoked both `sessionStart` and `preToolUse`. The probe logs
+  recorded `argv[0]` as the absolute `.../plugin-root-probe/hooks/probe.py`
+  path and recorded the second argument as the absolute plugin root, not the
+  literal string `${PLUGIN_ROOT}`. Existing installed plugins on this machine
+  use `bash` / OS-specific command-string forms (`awesome-copilot/azure`) or
+  relative `bash` with `cwd` (`copilot-cli-guideme`); those examples show the
+  common working shapes, but the scratch probe is what verified `exec` + `args`.
+- **This repo's plugin hook file parses and loads when mounted as a plugin.**
+  `copilot --plugin-dir harness/copilot-jev-gates plugin list --json` listed
+  `copilot-jev-gates` as an enabled external plugin. A prompt-mode run with the
+  same `--plugin-dir` produced a debug log whose `Plugins loaded` entry included
+  `copilot-jev-gates`, and `sessionStart` emitted this repo's
+  `[jev-gates] 15 Jev gates are active...` `additionalContext`.
+- **This repo's `preToolUse` hook fires.** In fixture mode, a prompt-mode run
+  that asked Copilot to run `bash: true` emitted the hook progress line
+  `{"type":"progress","message":"jev: tool-worth-it","temporary":true}` before
+  the bash command completed. A second run with a harmless scratch-path command
+  matching the destructive pattern (`rm -rf <nonexistent scratch path> && ...`)
+  emitted `jev: destructive-action` and the final hook decision:
+
+  ```json
+  {
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "Blocked by Jev gate 'destructive-action' (source=fixture): ..."
+  }
+  ```
+
+  In non-interactive prompt mode, the CLI could not request permission, so the
+  bash command was not executed and the scratch marker file remained empty.
+- **A command `preToolUse` hook can deny a tool call.** The same scratch plugin
+  returned:
+
+  ```json
+  {
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "probe denial: preToolUse hook executed and denied this bash call"
+  }
+  ```
+
+  Copilot reported that the bash call was denied, and the target scratch file
+  stayed at 0 bytes. This verifies the CLI's deny semantics independently of
+  this repo's fixture-mode choice to downgrade fixture-backed blocks to `ask`.
+
+### Still unverified
+
+- **Aggregate gate latency has now been measured** — see
+  [`../experiments/latency/RESULTS.md`](../experiments/latency/RESULTS.md).
+  End-to-end hook cost is ~40ms ungated and ~86ms for a fixture-mode gate, not
+  the ~300–500ms previously assumed here; Python interpreter startup (~42.7ms)
+  is the dominant term. What remains unmeasured is **live Jev network latency**,
+  since no API key was available, so the break-even model assumes 400ms rather
+  than measuring it.
 - **No live Jev run has been performed.** `TYPESAFE_API_KEY` was unavailable, so
   every result in this repo is `fixture` or `policy`. The live-proof step is
   blocked, not done.

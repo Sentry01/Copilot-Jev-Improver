@@ -165,7 +165,14 @@ Stated plainly, because the temptation to overclaim here is strong.
 
 **Proven:**
 
-- 15 gates run offline, deterministically, with no API key. 73 tests, 9 traps, all passing.
+- 16 gates run offline, deterministically, with no API key. 87 tests, 10 traps, all passing.
+- **The enforcement layer genuinely enforces.** Verified by controlled A/B against Copilot CLI
+  1.0.89-0: the same benign shell command wrote its marker file (6 bytes) with no plugin loaded,
+  and wrote nothing (0 bytes) with a `preToolUse` deny hook installed, the CLI reporting
+  `Denied by preToolUse hook`. `${PLUGIN_ROOT}` expands inside `args`, so this repo's `hooks.json`
+  loads as written. An earlier single-ended version of this test was discarded as worthless: the
+  command was blocked by Copilot's *own* built-in safety, so the null result proved nothing about
+  our hook. The control is what makes the claim.
 - The enforcement path works end to end: a tool call reaches a hook, routes to a gate, and the
   verdict becomes an `allow` / `ask` / `deny` decision Copilot CLI honours.
 - Hard rules work without the network. The Slack trap denies with `source=policy` and **zero Jev
@@ -184,11 +191,19 @@ Stated plainly, because the temptation to overclaim here is strong.
 - **Thresholds are reasoned, not calibrated.** They come from telemetry and argument, not from
   observed outcomes. [`ci-loop/`](../ci-loop/) is the machinery for fixing that, and it has no
   live data in it.
-- **Aggregate latency is unmeasured.** Each gate costs a few hundred milliseconds in fixture
-  mode. Whether a session gated end to end is *net* faster — saved work minus gate overhead — is
-  the central unanswered question of the entire approach.
-- **`${PLUGIN_ROOT}` expansion inside `args`** is assumed from the docs, not observed. If it does
-  not expand, `hooks.json` needs `bash` entries instead.
+- **Aggregate latency is now measured, and the answer is *mixed*.** See
+  [`experiments/latency/RESULTS.md`](../experiments/latency/RESULTS.md). End-to-end hook cost is
+  **40 ms** for an ungated cheap tool and **86 ms** for a full fixture-mode gate — far below the
+  300–500 ms this document previously assumed. Python interpreter startup (**43.3 ms**) dominates,
+  not the gate logic; local hard rules cost **0.1 ms**. Modelled against the real telemetry, the
+  current matcher costs **196 s over 30 days (3.3 s/session)**, repaid by 22 prevented duplicate
+  `bash` calls or 2 avoided `task` calls. But the break-even is brutal for cheap tools: gating
+  `edit` would require being right **171%** of the time against a live 400 ms scorer — i.e. it can
+  never pay. **Gate expensive and failure-prone tools; never gate cheap ones.**
+- **Live Jev latency is still unmeasured**, because there is no API key. The 400 ms used in the
+  break-even model is an assumption, not a measurement, and live numbers will be worse than the
+  fixture numbers above.
+- **`${PLUGIN_ROOT}` expansion inside `args` is now verified**, so the hooks do load. See §3.
 - One-machine, one-developer telemetry. The *shape* of the findings should generalise; the
   specific percentages should not be assumed to.
 
@@ -198,10 +213,14 @@ Stated plainly, because the temptation to overclaim here is strong.
 
 The honest failure modes, in order of likelihood:
 
-1. **Gate overhead exceeds gate savings.** Most likely on cheap, fast tool calls. Mitigated by
-   routing only expensive tools and by resolving hard rules locally — but not measured.
+1. **Gate overhead exceeds gate savings.** **Partly confirmed, and now bounded.** Measurement
+   shows this is real for cheap tools — gating `edit` can never pay — and false for expensive ones,
+   where a single avoided `task` repays a month of overhead. The mitigation (route only expensive
+   tools, resolve hard rules locally) is load-bearing rather than precautionary: widening the
+   matcher to all tools costs 37% more overhead for no additional savings.
 2. **Jev's calibration does not transfer.** Scores tuned on other decision types may cluster near
    the thresholds, making gates either permissive or obstructive. Detectable only with live data.
+   **This is now the single largest unknown.**
 3. **False denials train users to disable it.** A safety gate that blocks legitimate work twice
    gets uninstalled, which is strictly worse than never shipping it. This is why cost gates fail
    open and fixture-backed blocks degrade to `ask`.
@@ -213,17 +232,19 @@ The honest failure modes, in order of likelihood:
 In priority order:
 
 1. **Live Jev, one gate, one session.** `tool-worth-it` against real calls, logging score
-   distribution. Answers whether calibration transfers.
-2. **Latency A/B.** Identical task, gated and ungated, wall-clock and AI Units. Answers the
-   central question.
-3. **Trap replay against live Jev.** All 9 traps with `source=live`. Answers whether Jev catches
+   distribution. Answers whether calibration transfers. **Now the top priority**, since the
+   latency question below is largely answered.
+2. **Latency A/B with live Jev.** The offline half is done
+   ([`experiments/latency/`](../experiments/latency/)); what remains is substituting a real
+   network round trip for the assumed 400 ms.
+3. **Trap replay against live Jev.** All 10 traps with `source=live`. Answers whether Jev catches
    what the fixtures assume it catches.
 4. **Decision-log precision over ~100 live decisions.** `ci-loop/score_decisions.py` already
    suppresses aggregates below threshold; it needs rows.
 
-Until at least (1) and (2) exist, the correct description of this repository is: *a
-telemetry-grounded, fully enforced, offline-verified gate library whose judgement layer has never
-been switched on.*
+Until at least (1) exists, the correct description of this repository is: *a
+telemetry-grounded, enforcement-verified, latency-measured gate library whose judgement layer has
+never been switched on.*
 
 ---
 

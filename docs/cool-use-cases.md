@@ -202,9 +202,11 @@ averaged **39 s** per call. These are the calls worth a 400 ms gate.
 
 **Thresholds.** Run if `tool_worth_it ≥ 0.65`. Otherwise skip and log the blocker.
 
-**Do not gate cheap tools.** A Jev call costs 300–500 ms. Gating `view` (908 ms average) or
-`glob` (629 ms) is close to break-even; gating `edit` (256 ms) is a straight loss. Apply this gate
-only where `est_latency_ms ≥ 2000` or `est_cost_tier ≠ low`. The harness enforces this.
+**Do not gate cheap tools.** A gate costs ~86 ms end-to-end in fixture mode (measured — see
+[`experiments/latency/RESULTS.md`](../experiments/latency/RESULTS.md)), plus live Jev network time
+on top, assumed ~300–500 ms. Against a live 400 ms scorer, gating `view` (908 ms average) needs to
+be right 48% of the time and `edit` (256 ms) needs **171%** — i.e. `edit` can never pay. Apply this
+gate only where `est_latency_ms ≥ 2000` or `est_cost_tier ≠ low`. The harness enforces this.
 
 ---
 
@@ -728,8 +730,9 @@ user turn
 ## What we are not claiming
 
 - **Jev does not write anything.** Copilot still drafts every reply, edit and explanation.
-- **Gates are not free.** Roughly 300–500 ms each. The win is avoided tool spend and avoided bad
-  actions, not lower latency. A gate on a cheap call is a net loss.
+- **Gates are not free.** ~86 ms each end-to-end in fixture mode (measured), plus live Jev network
+  time. The win is avoided tool spend and avoided bad actions, not lower latency. A gate on a cheap
+  call is a net loss, and on `edit` it is an unrecoverable one.
 - **Thresholds here are starting points.** They are informed guesses, not measured optima.
   grokbot's send gate needed correction after real measurement; expect the same, which is what
   [`ci-loop/`](../ci-loop/) exists for.

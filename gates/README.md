@@ -1,6 +1,6 @@
 # The gate library
 
-15 decision gates that sit in front of Copilot CLI actions and ask Jev a small,
+16 decision gates that sit in front of Copilot CLI actions and ask Jev a small,
 calibrated question before an expensive or irreversible thing happens.
 
 Start with **[INDEX.md](INDEX.md)** for the full table of gates, thresholds,
@@ -31,7 +31,7 @@ Run any gate with no API key:
 JEV_MODE=fixture python3 -B gates/tool-worth-it/gate.py
 ```
 
-Run all 15:
+Run all 16:
 
 ```bash
 for d in gates/*/; do s=$(basename "$d"); [ "$s" = common ] && continue
@@ -96,8 +96,8 @@ shaping was ruled out as a lever. It is not in the library.
 ## Verifying
 
 ```bash
-JEV_MODE=fixture python3 -m unittest discover -s tests   # 73 tests
-python3 -B experiments/traps/run_traps.py                # 9 traps
+JEV_MODE=fixture python3 -m unittest discover -s tests   # 87 tests
+python3 -B experiments/traps/run_traps.py                # 10 traps
 python3 gates/build_index.py                             # regenerate INDEX.md
 ```
 
@@ -108,5 +108,11 @@ Regenerate `INDEX.md` after changing any `config.json`, or it will drift.
 No gate has run against live Jev — `TYPESAFE_API_KEY` was unavailable, so every
 result in this repo is `fixture` or `policy`. Thresholds are reasoned from
 telemetry, not validated against outcomes; [`ci-loop/`](../ci-loop/) is the
-machinery for validating them. Aggregate gate latency is unmeasured, and is the
-main risk to the approach being net-positive.
+machinery for validating them.
+
+Aggregate gate latency **has** now been measured
+([`experiments/latency/RESULTS.md`](../experiments/latency/RESULTS.md)): ~86 ms
+per gated call end-to-end, ~40 ms for an ungated one, dominated by Python
+startup rather than gate logic. The verdict is mixed on purpose — gates pay on
+expensive and failure-prone tools and can never pay on cheap ones. Live Jev
+network latency is still an assumption in that model, not a measurement.

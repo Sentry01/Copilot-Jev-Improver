@@ -12,6 +12,7 @@ Every gate ships `SPEC.md`, `config.json`, `gate.py`, `example_state.json`, a re
 |---|---|---|---|---|
 | [`destructive-action`](destructive-action/SPEC.md) | Before running an irreversible local or remote action, ask Jev whether the command is safe enough and whether the blast radius is recoverable. The gate prevents plausible cleanup or recovery steps from destroying work the user still needs | `blast_radius_max`=recoverable<br>`safe_to_execute_min`=0.8 | **closed** → `ask_user` | `safe_to_execute`, `blast_radius`, `safer_alternative` |
 | [`external-write`](external-write/SPEC.md) | Before creating, sending, or posting anything that leaves the machine, ask Jev whether the write is authorized, correct, and wanted. This covers PRs, issues, review comments, Slack messages, emails, calendar invites, and similar externally visible operations | `allowed_authorisation_basis`=explicit_request, standing_policy<br>`safe_to_send_min`=0.75 | **closed** → `block_external_write` | `safe_to_send`, `authorisation_basis`, `audience_risk` |
+| [`prompt-injection`](prompt-injection/SPEC.md) | Before ingesting untrusted external text, refuse content that tries to steer the agent, override higher-priority instructions, exfiltrate secrets, or trigger destructive tool use | `allowed_injection_intent`=none, benign_discussion<br>`safe_to_consume_min`=0.8<br>`severity_max`=low | **closed** → `quarantine_content` | `safe_to_consume`, `injection_intent`, `severity` |
 | [`secret-exposure`](secret-exposure/SPEC.md) | Before writing, printing, committing, or sending content, ask Jev whether anything sensitive would escape. This protects credentials, customer data, personal data, and internal-only details from durable or external exposure | `allowed_exposure_kind`=none<br>`safe_to_emit_min`=0.85 | **closed** → `block_emit` | `safe_to_emit`, `exposure_kind`, `severity` |
 
 ## Cost
@@ -43,7 +44,7 @@ Every gate ships `SPEC.md`, `config.json`, `gate.py`, `example_state.json`, a re
 
 ---
 
-15 gates. Run them all offline:
+16 gates. Run them all offline:
 
 ```bash
 for d in gates/*/; do s=$(basename $d); [ "$s" = common ] && continue; \

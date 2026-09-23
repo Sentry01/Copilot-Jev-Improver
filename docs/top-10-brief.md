@@ -59,10 +59,11 @@ build routing.
 
 Stated up front, because a brief that only lists upside is marketing.
 
-**Gate latency eats the win.** Each gate costs roughly 300–500 ms. Put one in front of a 256 ms
-`edit` call and you have made things worse. The harness short-circuits trivial turns and only
-gates calls where `est_latency_ms ≥ 2000` or cost tier is above `low`. If that discipline slips,
-the whole thing is net negative.
+**Gate latency eats the win.** Measured: ~86 ms per gate end-to-end offline, plus live Jev network
+time on top. Put one in front of a 256 ms `edit` call and you have made things worse — the
+break-even for `edit` against a live 400 ms scorer is 171%, meaning it can never pay. The harness
+short-circuits trivial turns and only gates calls where `est_latency_ms ≥ 2000` or cost tier is
+above `low`. If that discipline slips, the whole thing is net negative.
 
 **Thresholds start wrong.** They are informed guesses. The upstream sibling project shipped a
 send-gate at 0.70 that false-held genuinely good answers, and had to drop it to 0.65 and add an

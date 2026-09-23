@@ -48,18 +48,18 @@ Full method and the complete report: [`telemetry/`](telemetry/).
 ```
 docs/        ranked use-case research, exec brief, the hook API reference, and the write-up
 telemetry/   session-store queries, the miner, and redacted baseline reports
-gates/       the runnable Jev gate library — 15 gates, one directory each (see gates/INDEX.md)
+gates/       the runnable Jev gate library — 16 gates, one directory each (see gates/INDEX.md)
 harness/     the Copilot CLI plugin: hooks that route a tool call to the right gate
 experiments/ trap suite — adversarial scenarios each gate must catch
 ci-loop/     automatic decision logging, scoring, and baselines — calibration over time
 tests/       offline tests, including redaction, routing, semantics and repo hygiene
 ```
 
-## The 15 gates
+## The 16 gates
 
 | Lever | Gates |
 | --- | --- |
-| **Safety** | `destructive-action`, `secret-exposure`, `external-write` |
+| **Safety** | `destructive-action`, `secret-exposure`, `external-write`, `prompt-injection` |
 | **Cost** | `model-effort-route`, `tool-worth-it`, `redundant-tool-call`, `subagent-spawn`, `context-read-budget` |
 | **Performance** | `stop-vs-continue`, `retry-worth-it`, `parallel-fanout` |
 | **Quality** | `plan-vs-act`, `skill-selection`, `verification-sufficient`, `response-quality` |
@@ -89,8 +89,8 @@ export TYPESAFE_API_KEY=...        # never commit this
 cd gates/<slug> && JEV_MODE=live python3 gate.py
 
 # The whole thing, offline
-JEV_MODE=fixture python3 -m unittest discover -s tests   # 73 tests
-python3 -B experiments/traps/run_traps.py                # 9 adversarial traps
+JEV_MODE=fixture python3 -m unittest discover -s tests   # 87 tests
+python3 -B experiments/traps/run_traps.py                # 10 adversarial traps
 ```
 
 Python 3.13, standard library only. No dependencies to install.
@@ -122,13 +122,23 @@ policy — see [`telemetry/README.md`](telemetry/README.md).
 
 ## Status
 
-The ranked research, the 15-gate library, the enforcing plugin, the trap suite and the
-improvement loop are built and pass offline: **73 tests, 15 gates, 9 traps**.
+The ranked research, the 16-gate library, the enforcing plugin, the trap suite and the
+improvement loop are built and pass offline: **87 tests, 16 gates, 10 traps**.
+
+**Verified against a running CLI (1.0.89-0):** the plugin's hooks load, `${PLUGIN_ROOT}` expands
+inside `args`, and a `preToolUse` deny genuinely prevents execution — proven by A/B control, where
+the same benign command ran without the plugin and was blocked with it.
+
+**Measured:** end-to-end hook cost is **40 ms** ungated / **86 ms** for a fixture gate, dominated
+by Python startup rather than gate logic — see
+[`experiments/latency/RESULTS.md`](experiments/latency/RESULTS.md). The verdict is deliberately
+*mixed*: gates pay for themselves on expensive and failure-prone tools, and can **never** pay on
+cheap ones like `edit`.
 
 What is **not** proven: no gate has run against live Jev, because `TYPESAFE_API_KEY` was
 unavailable — every result here is `fixture` or `policy`, and is labelled as such. Thresholds are
-reasoned from telemetry rather than validated against outcomes. Aggregate gate latency is
-unmeasured, and is the main risk to the whole approach being net-positive.
+reasoned from telemetry rather than validated against outcomes, and live Jev network latency
+remains an assumption in the break-even model.
 [`docs/HOW-JEV-IMPROVES-COPILOT.md`](docs/HOW-JEV-IMPROVES-COPILOT.md) keeps a running list of
 what would have to be measured to call any of this proven.
 

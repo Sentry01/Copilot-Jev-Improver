@@ -111,6 +111,21 @@ EXTERNAL_WRITE_PREFIXES = (
     "workiq-",
 )
 
+# Tools whose successful result is untrusted third-party text. These route to
+# the prompt-injection safety gate before any cost/performance gate.
+UNTRUSTED_TEXT_TOOLS = frozenset({"web_fetch"})
+UNTRUSTED_TEXT_PREFIXES = (
+    "slack-",
+    "cc-828GDeeqlf0t1i29-",  # Teams
+    "cc-pdqHAftw9cy3d8Vw-",  # Outlook mail
+    "cc-qoxxvytaDqWyRth7-",  # Calendar
+    "atlassian-",
+    "workiq-",
+    "github-mcp-server-",
+    "microsoft-learn-",
+    "cc-75K8Xw4TbwLyh3e4-",
+)
+
 # Standing read-only policy. These are hard rules, not thresholds: the gate
 # blocks without consulting Jev at all.
 READ_ONLY_PREFIXES = (
@@ -167,7 +182,27 @@ def is_bash_read(tool_name: str, tool_args: Any) -> bool:
 
 
 def is_external_write(tool_name: str) -> bool:
-    return tool_name in EXTERNAL_WRITE_TOOLS or tool_name.startswith(EXTERNAL_WRITE_PREFIXES)
+    if tool_name in EXTERNAL_WRITE_TOOLS:
+        return True
+    if not tool_name.startswith(EXTERNAL_WRITE_PREFIXES):
+        return False
+    tokens = tool_tokens(tool_name)
+    if tokens & WRITE_VERBS:
+        return True
+    return not (tokens & READ_VERBS)
+
+
+def is_untrusted_text_ingest(tool_name: str, tool_args: Any) -> bool:
+    if tool_name == "web_search":
+        return _extract_untrusted_text(tool_args)[1]
+    if tool_name in UNTRUSTED_TEXT_TOOLS:
+        return True
+    if not tool_name.startswith(UNTRUSTED_TEXT_PREFIXES):
+        return False
+    tokens = tool_tokens(tool_name)
+    if tokens & WRITE_VERBS:
+        return False
+    return bool(tokens & READ_VERBS)
 
 
 def tool_tokens(tool_name: str) -> set[str]:
@@ -271,6 +306,9 @@ def route_pre_tool_use(tool_name: str, tool_args: Any, cwd: str) -> Route | None
     if is_external_write(tool_name):
         return "external-write", lambda p: _external_write_state(tool_name, tool_args)
 
+    if is_untrusted_text_ingest(tool_name, tool_args):
+        return "prompt-injection", lambda p: _prompt_injection_state(tool_name, tool_args)
+
     if is_emit(tool_name, tool_args):
         return "secret-exposure", lambda p: _secret_state(tool_args)
 
@@ -342,6 +380,92 @@ def _secret_state(tool_args: Any) -> dict[str, Any]:
         "repo_visibility": os.environ.get("COPILOT_JEV_REPO_VISIBILITY", "public"),
         "data_classification": "internal",
     }
+
+
+CONTENT_KEYS = frozenset(
+    {
+        "body", "comment", "comments", "content", "description", "html",
+        "markdown", "message", "messages", "page", "result", "results",
+        "response", "snippet", "summary", "text", "thread", "title",
+        "transcript",
+    }
+)
+MAX_UNTRUSTED_TEXT_CHARS = 6000
+
+
+def _prompt_injection_state(tool_name: str, tool_args: Any) -> dict[str, Any]:
+    content, available, truncated = _extract_untrusted_text(tool_args)
+    if not content:
+        content = _summarise(tool_args, ("content", "text", "body", "message", "query", "url"), limit=1000)
+    return {
+        "untrusted_content": content,
+        "source_tool": tool_name,
+        "source_kind": _source_kind(tool_name),
+        "retrieval_context": _summarise(tool_args, ("query", "url", "path", "channel", "repo_full_name"), limit=400),
+        "content_available": available,
+        "content_truncated": truncated,
+    }
+
+
+def _source_kind(tool_name: str) -> str:
+    if tool_name == "web_fetch":
+        return "web_page"
+    if tool_name == "web_search":
+        return "web_search"
+    if tool_name.startswith("slack-") or tool_name.startswith("cc-828GDeeqlf0t1i29-"):
+        return "chat"
+    if tool_name.startswith("cc-pdqHAftw9cy3d8Vw-"):
+        return "email"
+    if tool_name.startswith("atlassian-"):
+        return "ticket"
+    if tool_name.startswith("github-mcp-server-"):
+        return "github_comment"
+    if tool_name.startswith(UNTRUSTED_TEXT_PREFIXES):
+        return "mcp_result"
+    return "unknown"
+
+
+def _extract_untrusted_text(value: Any) -> tuple[str, bool, bool]:
+    parts: list[str] = []
+    truncated = False
+
+    def add(text: str) -> None:
+        nonlocal truncated
+        if not text.strip() or truncated:
+            return
+        remaining = MAX_UNTRUSTED_TEXT_CHARS - sum(len(part) for part in parts)
+        if remaining <= 0:
+            truncated = True
+            return
+        if len(text) > remaining:
+            parts.append(text[:remaining])
+            truncated = True
+        else:
+            parts.append(text)
+
+    def walk(node: Any, *, include_all: bool = False, depth: int = 0) -> None:
+        if depth > 5 or truncated:
+            return
+        if isinstance(node, str):
+            if include_all:
+                add(node)
+            return
+        if isinstance(node, list):
+            for item in node[:20]:
+                walk(item, include_all=include_all, depth=depth + 1)
+            return
+        if isinstance(node, dict):
+            for key, item in node.items():
+                key_text = str(key).lower()
+                nested_include = include_all or key_text in CONTENT_KEYS
+                walk(item, include_all=nested_include, depth=depth + 1)
+
+    if isinstance(value, str):
+        add(value)
+    else:
+        walk(value)
+
+    return "\n\n".join(parts), bool(parts), truncated
 
 
 def _spawn_state(tool_name: str, tool_args: Any) -> dict[str, Any]:

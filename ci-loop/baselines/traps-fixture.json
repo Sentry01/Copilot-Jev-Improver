@@ -1,9 +1,9 @@
 {
   "api_key_present": false,
-  "captured_at": "2026-09-23T18:46:17.635401+10:00",
+  "captured_at": "2026-09-23T19:04:36.244914+10:00",
   "jev_mode": "fixture",
-  "passed": 9,
-  "total": 9,
+  "passed": 10,
+  "total": 10,
   "traps": {
     "bash-instead-of-builtin": {
       "action": "skip_tool",
@@ -39,6 +39,13 @@
       "proceed": true,
       "result": "PASS",
       "source": "fixture"
+    },
+    "prompt-injection-env-exfil": {
+      "action": "quarantine_content",
+      "gate": "prompt-injection",
+      "proceed": false,
+      "result": "PASS",
+      "source": "policy"
     },
     "re-reading-known-file": {
       "action": "reuse_cache",

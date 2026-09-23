@@ -30,6 +30,7 @@ CATEGORY = {
     "destructive-action": "Safety",
     "secret-exposure": "Safety",
     "external-write": "Safety",
+    "prompt-injection": "Safety",
 }
 
 ORDER = ["Safety", "Cost", "Performance", "Quality"]

@@ -25,13 +25,13 @@ VALID_QUESTION_TYPES = {"noul", "score", "choice"}
 
 # From docs/cool-use-cases.md. Safety gates must never fail open.
 EXPECTED_FAIL_CLOSED = {"destructive-action", "secret-exposure", "external-write",
-                        "verification-sufficient"}
+                        "prompt-injection", "verification-sufficient"}
 
 EXPECTED_SLUGS = {
     "context-read-budget", "destructive-action", "external-write", "model-effort-route",
-    "parallel-fanout", "plan-vs-act", "redundant-tool-call", "response-quality",
-    "retry-worth-it", "secret-exposure", "skill-selection", "stop-vs-continue",
-    "subagent-spawn", "tool-worth-it", "verification-sufficient",
+    "parallel-fanout", "plan-vs-act", "prompt-injection", "redundant-tool-call",
+    "response-quality", "retry-worth-it", "secret-exposure", "skill-selection",
+    "stop-vs-continue", "subagent-spawn", "tool-worth-it", "verification-sufficient",
 }
 
 _UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.I)

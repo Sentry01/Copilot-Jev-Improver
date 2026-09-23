@@ -2,11 +2,8 @@
 """retry-worth-it gate — local retry hard-stop plus shared runner."""
 from __future__ import annotations
 
-import json
 import sys
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 GATE_DIR = Path(__file__).resolve().parent
 ROOT = GATE_DIR.parent
@@ -14,9 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from common.runner import decide as _decide  # noqa: E402
-from common.runner import load_config, load_example_state, write_dry_result  # noqa: E402
-
-SYD = ZoneInfo("Australia/Sydney")
+from common.runner import run_cli  # noqa: E402
 
 
 def _noul(answers: dict, key: str) -> float | None:
@@ -62,17 +57,25 @@ def _hard_stop_decision(config: dict, state: dict) -> dict:
     }
 
 
+def hard_rule(state: dict, config: dict) -> dict | None:
+    thresholds = config.get("thresholds") or {}
+    hard_stop = int(thresholds.get("hard_stop_attempt_number", 3))
+    if isinstance(state, dict) and _attempt(state) >= hard_stop:
+        return _hard_stop_decision(config, state)
+    return None
+
+
 def evaluate(answers: dict, config: dict, client_result: dict) -> dict:
     state = _state(client_result)
+    policy_decision = hard_rule(state, config)
+    if policy_decision is not None:
+        return policy_decision
+
     thresholds = config.get("thresholds") or {}
     retry_min = float(thresholds.get("retry_will_succeed_min", 0.55))
-    hard_stop = int(thresholds.get("hard_stop_attempt_number", 3))
     forbidden = set(thresholds.get("retry_same_forbidden_failure_classes", ["auth", "unsupported"]))
     attempt = _attempt(state)
     change = (state.get("change_since_last_attempt") or "").strip()
-
-    if attempt >= hard_stop:
-        return _hard_stop_decision(config, state)
 
     retry_noul = _noul(answers, "retry_will_succeed")
     failure_class = _choice(answers, "failure_class")
@@ -129,65 +132,10 @@ def evaluate(answers: dict, config: dict, client_result: dict) -> dict:
     }
 
 
-def _policy_outcome(state: dict, config: dict, *, write_dry: bool = False) -> dict:
-    slug = config.get("slug") or GATE_DIR.name
-    name = config.get("name") or slug
-    decision = _hard_stop_decision(config, state)
-    outcome = {
-        "slug": slug,
-        "name": name,
-        "ok": True,
-        "http_status": None,
-        "latency_ms": 0.0,
-        "error": None,
-        "model": None,
-        "answers": {},
-        "usage": {},
-        "source": "policy",
-        "decision": decision,
-        "request_sans_auth": {"model": None, "state": state, "questions": config.get("questions") or {}},
-        "as_of": datetime.now(SYD).strftime("%Y-%m-%d %H:%M:%S AEST"),
-        "dry_path": None,
-    }
-    if write_dry:
-        dry_path = write_dry_result(GATE_DIR, outcome, {"headers": {}}, dry_name=None)
-        outcome["dry_path"] = str(dry_path)
-    return outcome
-
-
 def decide(state: dict, *, write_dry: bool = False) -> dict:
     """Importable: decide(state) -> outcome dict (includes decision + answers)."""
-    config = load_config(GATE_DIR)
-    if isinstance(state, dict) and _attempt(state) >= int((config.get("thresholds") or {}).get("hard_stop_attempt_number", 3)):
-        return _policy_outcome(state, config, write_dry=write_dry)
-    return _decide(GATE_DIR, state, evaluate, write_dry=write_dry)
-
-
-def run_cli_gate() -> int:
-    state = load_example_state(GATE_DIR)
-    outcome = decide(state, write_dry=True)
-    d = outcome.get("decision") or {}
-    print(
-        f"[{outcome.get('slug')}] source={outcome.get('source')} "
-        f"http={outcome.get('http_status')} latency_ms={outcome.get('latency_ms')} "
-        f"ok={outcome.get('ok')} action={d.get('action')} "
-        f"proceed={d.get('proceed')} dry={outcome.get('dry_path')}",
-        file=sys.stderr,
-    )
-    summary = {
-        "slug": outcome.get("slug"),
-        "source": outcome.get("source"),
-        "http_status": outcome.get("http_status"),
-        "latency_ms": outcome.get("latency_ms"),
-        "ok": outcome.get("ok"),
-        "error": outcome.get("error"),
-        "answers": outcome.get("answers"),
-        "decision": outcome.get("decision"),
-        "dry_path": outcome.get("dry_path"),
-    }
-    print(json.dumps(summary, indent=2, ensure_ascii=False))
-    return 0
+    return _decide(GATE_DIR, state, evaluate, write_dry=write_dry, hard_rule=hard_rule)
 
 
 if __name__ == "__main__":
-    raise SystemExit(run_cli_gate())
+    raise SystemExit(run_cli(GATE_DIR, evaluate, hard_rule=hard_rule))

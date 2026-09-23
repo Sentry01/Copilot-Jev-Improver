@@ -41,7 +41,7 @@ from harness import (  # noqa: E402
     violates_read_only,
 )
 
-SAFETY_SLUGS = frozenset({"destructive-action", "secret-exposure", "external-write"})
+SAFETY_SLUGS = frozenset({"destructive-action", "secret-exposure", "external-write", "prompt-injection"})
 
 
 def main() -> int:
