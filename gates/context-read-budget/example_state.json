@@ -1,0 +1,7 @@
+{
+  "goal": "Confirm the threshold for the context-read-budget gate in the spec.",
+  "target": "docs/cool-use-cases.md section 4",
+  "known_size_tier": "large",
+  "proposed_read": "full_file",
+  "already_read": "The headings and line range for section 4 are already known."
+}

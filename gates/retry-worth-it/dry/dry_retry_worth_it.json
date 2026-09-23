@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "name": "dry_retry_worth_it",
+    "slug": "retry-worth-it",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 0.0,
+    "error": null,
+    "as_of": "2026-09-23 18:30:20 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "failed_tool": "browser_click",
+      "error_summary": "Click failed because the accessible name no longer matched after the page rerendered.",
+      "attempt_number": 2,
+      "change_since_last_attempt": "Use the role-based locator from the fresh accessibility snapshot instead of the stale text selector.",
+      "tool_historical_failure_rate": 0.786,
+      "alternative_paths": "Use keyboard navigation or inspect the page snapshot before clicking again."
+    },
+    "questions": {
+      "retry_will_succeed": {
+        "type": "noul",
+        "instructions": "Given the failed tool, error summary, attempt number, actual change since the last attempt, historical failure rate, and alternative paths, estimate the calibrated probability that another attempt will succeed because something material changed."
+      },
+      "failure_class": {
+        "type": "choice",
+        "instructions": "Classify the failure cause that best explains the previous failed attempt.",
+        "criteria": {
+          "transient": "The failure appears temporary, flaky, or caused by timing.",
+          "auth": "Authentication, authorization, sign-in, permission, or token state prevented success.",
+          "wrong_target": "The attempt addressed the wrong element, path, item, branch, or target.",
+          "unsupported": "The requested operation or surface is unsupported by the chosen tool.",
+          "malformed_input": "The tool input was invalid, incomplete, or badly shaped."
+        }
+      },
+      "next_action": {
+        "type": "choice",
+        "instructions": "Choose the next action that should replace a blind retry.",
+        "criteria": {
+          "retry_same": "Retry the same tool call with no meaningful change.",
+          "retry_adjusted": "Retry after changing the selector, input, timing, or other material condition.",
+          "switch_tool": "Use a different tool or path to achieve the goal.",
+          "ask_user": "Ask the user for missing authorization or direction.",
+          "abandon": "Stop pursuing this path because it is not worth further attempts."
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-fixture",
+    "answers": {
+      "retry_will_succeed": {
+        "type": "noul",
+        "noul": 0.61
+      },
+      "failure_class": {
+        "type": "choice",
+        "choice": "wrong_target",
+        "confidence": 0.74,
+        "probabilities": {
+          "transient": 0.07,
+          "auth": 0.02,
+          "wrong_target": 0.74,
+          "unsupported": 0.04,
+          "malformed_input": 0.13
+        }
+      },
+      "next_action": {
+        "type": "choice",
+        "choice": "retry_adjusted",
+        "confidence": 0.79,
+        "probabilities": {
+          "retry_same": 0.03,
+          "retry_adjusted": 0.79,
+          "switch_tool": 0.12,
+          "ask_user": 0.02,
+          "abandon": 0.04
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "retry_adjusted",
+    "proceed": true,
+    "reason": "retry: retry_will_succeed=0.61 >= 0.55; change_since_last_attempt is non-empty; next_action=retry_adjusted",
+    "retry_will_succeed": 0.61,
+    "failure_class": "wrong_target",
+    "next_action": "retry_adjusted",
+    "attempt_number": 2,
+    "change_since_last_attempt": "Use the role-based locator from the fresh accessibility snapshot instead of the stale text selector.",
+    "thresholds": {
+      "retry_will_succeed_min": 0.55,
+      "hard_stop_attempt_number": 3,
+      "retry_same_forbidden_failure_classes": [
+        "auth",
+        "unsupported"
+      ]
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "proposed_calls": [
+    {
+      "tool": "view",
+      "intent": "Read the gate runner implementation"
+    },
+    {
+      "tool": "view",
+      "intent": "Read the fixture helper implementation"
+    },
+    {
+      "tool": "view",
+      "intent": "Read the reference gate specification"
+    }
+  ],
+  "dependency_notes": "Each call is a read-only file inspection and none depends on another result.",
+  "shared_state_touched": "No writes; distinct files are read.",
+  "est_latencies_ms": [
+    120,
+    120,
+    180
+  ]
+}

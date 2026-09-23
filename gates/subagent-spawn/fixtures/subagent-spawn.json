@@ -1,0 +1,36 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "spawn_justified": {
+      "type": "noul",
+      "noul": 0.52
+    },
+    "spawn_reason": {
+      "type": "choice",
+      "choice": "should_inline",
+      "confidence": 0.77,
+      "probabilities": {
+        "context_isolation": 0.06,
+        "true_parallelism": 0.05,
+        "specialised_skill": 0.04,
+        "underspecified": 0.08,
+        "should_inline": 0.77
+      }
+    },
+    "expected_multiplier": {
+      "type": "score",
+      "score": 1,
+      "confidence": 0.71,
+      "legend": "2x",
+      "probabilities": {
+        "1x": 0.2,
+        "2x": 0.56,
+        "5x": 0.2,
+        "10x": 0.03,
+        "20x_plus": 0.01
+      }
+    }
+  }
+}

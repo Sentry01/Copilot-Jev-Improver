@@ -9,6 +9,12 @@
 **/api_keys*
 **/token*.json
 
+# The secret-exposure *gate* is source code about secrets, not a secret. The
+# broad **/*secret* rule above would silently exclude the whole directory, so
+# it is re-included explicitly. Re-checked by tests/test_repo_hygiene.py.
+!gates/secret-exposure/
+!gates/secret-exposure/**
+
 # --- telemetry: raw, unredacted exports never leave the machine ---
 telemetry/raw/
 telemetry/**/raw_*.json

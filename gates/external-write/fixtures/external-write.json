@@ -1,0 +1,35 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "safe_to_send": {
+      "type": "noul",
+      "noul": 0.82
+    },
+    "authorisation_basis": {
+      "type": "choice",
+      "choice": "explicit_request",
+      "confidence": 0.88,
+      "probabilities": {
+        "explicit_request": 0.78,
+        "standing_policy": 0.1,
+        "inferred": 0.09,
+        "none": 0.03
+      }
+    },
+    "audience_risk": {
+      "type": "score",
+      "score": 1,
+      "confidence": 0.72,
+      "legend": "team",
+      "probabilities": {
+        "self": 0.08,
+        "team": 0.72,
+        "org": 0.16,
+        "customer": 0.03,
+        "public": 0.01
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "name": "dry_redundant_tool_call",
+    "slug": "redundant-tool-call",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 14.8,
+    "error": null,
+    "as_of": "2026-09-23 18:30:19 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "proposed_call": "view README.md lines 1-120",
+      "prior_calls": "The same README.md range was read earlier in this turn and no file write touched README.md afterward.",
+      "elapsed_since_prior": "about 3 minutes",
+      "volatility": "static"
+    },
+    "questions": {
+      "is_redundant": {
+        "type": "noul",
+        "instructions": "Given the proposed call, comparable prior calls this session, elapsed time, and volatility of the underlying data, estimate the calibrated belief that the agent already has the answer and the call is redundant."
+      },
+      "reuse_strategy": {
+        "type": "choice",
+        "instructions": "Choose how to handle the proposed repeat call while accounting for staleness and volatility.",
+        "criteria": {
+          "reuse_cache": "Reuse the prior result already in context.",
+          "narrow_scope": "Do not repeat the broad call; make a narrower call only if needed.",
+          "call_anyway_stale": "Call again because the prior result may be stale.",
+          "call_anyway_new": "Call because this is effectively new information despite similar arguments."
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-fixture",
+    "answers": {
+      "is_redundant": {
+        "type": "noul",
+        "noul": 0.82
+      },
+      "reuse_strategy": {
+        "type": "choice",
+        "choice": "reuse_cache",
+        "confidence": 0.84,
+        "probabilities": {
+          "reuse_cache": 0.72,
+          "narrow_scope": 0.12,
+          "call_anyway_stale": 0.1,
+          "call_anyway_new": 0.06
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "reuse_cache",
+    "proceed": false,
+    "reason": "is_redundant=0.82 >= 0.65; reuse_strategy=reuse_cache",
+    "signals": {
+      "is_redundant": 0.82,
+      "reuse_strategy": "reuse_cache",
+      "volatility": "static",
+      "mutation_between_calls": false
+    },
+    "thresholds": {
+      "is_redundant_min": 0.65
+    }
+  }
+}

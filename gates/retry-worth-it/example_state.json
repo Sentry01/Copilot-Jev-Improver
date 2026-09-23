@@ -1,0 +1,8 @@
+{
+  "failed_tool": "browser_click",
+  "error_summary": "Click failed because the accessible name no longer matched after the page rerendered.",
+  "attempt_number": 2,
+  "change_since_last_attempt": "Use the role-based locator from the fresh accessibility snapshot instead of the stale text selector.",
+  "tool_historical_failure_rate": 0.786,
+  "alternative_paths": "Use keyboard navigation or inspect the page snapshot before clicking again."
+}

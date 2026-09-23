@@ -1,0 +1,35 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "retry_will_succeed": {
+      "type": "noul",
+      "noul": 0.61
+    },
+    "failure_class": {
+      "type": "choice",
+      "choice": "wrong_target",
+      "confidence": 0.74,
+      "probabilities": {
+        "transient": 0.07,
+        "auth": 0.02,
+        "wrong_target": 0.74,
+        "unsupported": 0.04,
+        "malformed_input": 0.13
+      }
+    },
+    "next_action": {
+      "type": "choice",
+      "choice": "retry_adjusted",
+      "confidence": 0.79,
+      "probabilities": {
+        "retry_same": 0.03,
+        "retry_adjusted": 0.79,
+        "switch_tool": 0.12,
+        "ask_user": 0.02,
+        "abandon": 0.04
+      }
+    }
+  }
+}

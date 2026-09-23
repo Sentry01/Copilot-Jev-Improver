@@ -1,0 +1,39 @@
+{
+  "slug": "context-read-budget",
+  "name": "Context Read Budget Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "use_proposed_read",
+    "proceed": true
+  },
+  "thresholds": {
+    "full_read_justified_min": 0.7
+  },
+  "questions": {
+    "full_read_justified": {
+      "type": "noul",
+      "instructions": "Given the goal, target, known size, proposed read, and already-read context, estimate the calibrated belief that reading the full file or full tree is genuinely needed rather than a bounded search or range."
+    },
+    "read_strategy": {
+      "type": "choice",
+      "instructions": "Choose the most context-efficient read strategy that still satisfies the goal.",
+      "criteria": {
+        "targeted_search": "Search narrowly for the needed symbol, phrase, or file path before reading content.",
+        "ranged_read": "Read only a bounded line range or focused section.",
+        "full_read": "Read the full file or scope because the whole content is justified.",
+        "already_have_it": "The needed information is already in context; skip the read."
+      }
+    },
+    "expected_relevance": {
+      "type": "score",
+      "instructions": "Score how relevant the proposed read scope is expected to be to the current goal.",
+      "criteria": [
+        "none",
+        "low",
+        "moderate",
+        "high",
+        "certain"
+      ]
+    }
+  }
+}

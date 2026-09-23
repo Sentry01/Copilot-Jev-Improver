@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "name": "dry_skill_selection",
+    "slug": "skill-selection",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 0.0,
+    "error": null,
+    "as_of": "2026-09-23 18:30:20 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "user_request": "Before claiming this code change is done, verify the CLI path and importable path both work in fixture mode.",
+      "candidate_skills": [
+        {
+          "name": "verification-before-completion",
+          "description": "Requires fresh verification evidence before making completion claims."
+        },
+        {
+          "name": "test-driven-development",
+          "description": "Guides red-green implementation for behavior changes."
+        },
+        {
+          "name": "systematic-debugging",
+          "description": "Structured root-cause workflow for failures."
+        },
+        {
+          "name": "copywriting",
+          "description": "Improves business prose and messaging."
+        }
+      ],
+      "task_domain": "code_edit",
+      "skill_context_cost": "small"
+    },
+    "questions": {
+      "skill_needed": {
+        "type": "noul",
+        "instructions": "Given the user request, task domain, candidate skill shortlist, and skill context cost: would loading a skill materially improve the outcome enough to justify its context cost?"
+      },
+      "best_skill": {
+        "type": "choice",
+        "instructions": "Which shortlisted skill is the best fit to load now, or choose none if no skill should be loaded?",
+        "criteria": {
+          "verification-before-completion": "Requires fresh verification evidence before making completion claims.",
+          "test-driven-development": "Guides red-green implementation for behavior changes.",
+          "systematic-debugging": "Structured root-cause workflow for failures.",
+          "copywriting": "Improves business prose and messaging.",
+          "none": "No skill should be loaded for this task"
+        }
+      },
+      "match_strength": {
+        "type": "score",
+        "instructions": "How strong is the best candidate skill's fit for this task?",
+        "criteria": [
+          "none",
+          "weak",
+          "partial",
+          "strong",
+          "exact"
+        ]
+      }
+    }
+  },
+  "response": {
+    "model": "jev-latest",
+    "answers": {
+      "skill_needed": {
+        "type": "noul",
+        "noul": 0.84
+      },
+      "best_skill": {
+        "type": "choice",
+        "choice": "verification-before-completion",
+        "confidence": 0.86,
+        "probabilities": {
+          "verification-before-completion": 0.86,
+          "test-driven-development": 0.06,
+          "systematic-debugging": 0.04,
+          "copywriting": 0.01,
+          "none": 0.03
+        }
+      },
+      "match_strength": {
+        "type": "score",
+        "score": "exact",
+        "confidence": 0.82,
+        "legend": [
+          "none",
+          "weak",
+          "partial",
+          "strong",
+          "exact"
+        ],
+        "probabilities": {
+          "none": 0.01,
+          "weak": 0.02,
+          "partial": 0.07,
+          "strong": 0.08,
+          "exact": 0.82
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "load_skill",
+    "proceed": true,
+    "reason": "load verification-before-completion: skill_needed=0.84 >= 0.6 and match_strength=exact >= partial; candidates=4",
+    "skill_needed": 0.84,
+    "best_skill": "verification-before-completion",
+    "match_strength": "exact",
+    "match_strength_index": 4,
+    "candidate_count": 4,
+    "thresholds": {
+      "skill_needed_min": 0.6,
+      "match_strength_min": "partial",
+      "match_strength_min_index": 2,
+      "max_candidates": 8
+    }
+  }
+}

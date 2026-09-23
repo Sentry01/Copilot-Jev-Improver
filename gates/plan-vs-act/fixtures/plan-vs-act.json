@@ -1,0 +1,41 @@
+{
+  "model": "jev-latest",
+  "answers": {
+    "needs_plan": {
+      "type": "noul",
+      "noul": 0.72
+    },
+    "ambiguity_level": {
+      "type": "score",
+      "score": "high",
+      "confidence": 0.74,
+      "legend": [
+        "none",
+        "minor",
+        "moderate",
+        "high",
+        "blocking"
+      ],
+      "probabilities": {
+        "none": 0.02,
+        "minor": 0.06,
+        "moderate": 0.15,
+        "high": 0.74,
+        "blocking": 0.03
+      }
+    },
+    "recommended_mode": {
+      "type": "choice",
+      "choice": "full_plan",
+      "confidence": 0.69,
+      "probabilities": {
+        "act_now": 0.05,
+        "quick_outline": 0.19,
+        "full_plan": 0.69,
+        "ask_clarifying_first": 0.07
+      }
+    }
+  },
+  "usage": {},
+  "latency_ms": 0.0
+}

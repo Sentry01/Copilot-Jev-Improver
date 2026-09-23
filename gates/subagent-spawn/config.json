@@ -1,0 +1,43 @@
+{
+  "slug": "subagent-spawn",
+  "name": "Subagent Spawn Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "spawn",
+    "proceed": true
+  },
+  "thresholds": {
+    "spawn_justified_min": 0.65,
+    "blocked_spawn_reason": "underspecified",
+    "factory_fleet_requires_reason": "true_parallelism",
+    "factory_fleet_max_multiplier": "5x"
+  },
+  "questions": {
+    "spawn_justified": {
+      "type": "noul",
+      "instructions": "Given the task, context transfer size, whether the parent can do it inline, the parallelism benefit, spawn kind, and shared-tree write risk, estimate the calibrated probability that delegation beats doing the work inline."
+    },
+    "spawn_reason": {
+      "type": "choice",
+      "instructions": "Choose the main reason delegation is or is not justified.",
+      "criteria": {
+        "context_isolation": "A separate context window materially improves focus or avoids context overflow.",
+        "true_parallelism": "The delegated work is genuinely independent and can run in parallel.",
+        "specialised_skill": "The child has a specialized skill or tool access that the parent should use.",
+        "underspecified": "The delegation prompt would be too vague or incomplete.",
+        "should_inline": "The parent should handle this inline without spawning another agent."
+      }
+    },
+    "expected_multiplier": {
+      "type": "score",
+      "instructions": "Estimate the total execution multiplier introduced by delegation. Use the ordered criteria from least to most expensive.",
+      "criteria": [
+        "1x",
+        "2x",
+        "5x",
+        "10x",
+        "20x_plus"
+      ]
+    }
+  }
+}

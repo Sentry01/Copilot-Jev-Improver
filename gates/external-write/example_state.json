@@ -1,0 +1,8 @@
+{
+  "action": "create_pull_request",
+  "destination": "repository maintainers",
+  "content_summary": "Open a draft pull request with the five new gate implementations for review.",
+  "user_authorised": true,
+  "channel_policy": "write_allowed",
+  "reversible": "editable"
+}

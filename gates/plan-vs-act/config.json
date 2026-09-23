@@ -1,0 +1,41 @@
+{
+  "slug": "plan-vs-act",
+  "name": "Plan vs Act Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "act_now",
+    "proceed": true
+  },
+  "thresholds": {
+    "needs_plan_min": 0.6,
+    "ambiguity_plan_min": "high",
+    "ambiguity_blocking": "blocking"
+  },
+  "questions": {
+    "needs_plan": {
+      "type": "noul",
+      "instructions": "Given the user request, estimated steps, number of files likely touched, ambiguity, reversibility, and any user-specified mode: would making a plan before acting materially improve the outcome?"
+    },
+    "ambiguity_level": {
+      "type": "score",
+      "instructions": "How much genuine ambiguity remains before safely choosing the next workflow mode?",
+      "criteria": [
+        "none",
+        "minor",
+        "moderate",
+        "high",
+        "blocking"
+      ]
+    },
+    "recommended_mode": {
+      "type": "choice",
+      "instructions": "Which workflow mode should be used next if the user did not explicitly override it?",
+      "criteria": {
+        "act_now": "Proceed directly with the implementation or answer",
+        "quick_outline": "Give a brief outline before acting",
+        "full_plan": "Create a structured plan before acting",
+        "ask_clarifying_first": "Ask a clarifying question before planning or acting"
+      }
+    }
+  }
+}

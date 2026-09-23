@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "name": "dry_tool_worth_it",
+    "slug": "tool-worth-it",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 15.9,
+    "error": null,
+    "as_of": "2026-09-23 18:30:20 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "user_goal": "Summarize whether the offline gate runner needs another network check.",
+      "already_have": "The fixture loader path, missing-file warning, and fail-open decision are already visible from the previous run.",
+      "proposed_tool": "web_search for current TypeSafe API examples before explaining local fixture behavior",
+      "est_cost_tier": "high",
+      "est_latency_ms": 39000
+    },
+    "questions": {
+      "tool_worth_it": {
+        "type": "noul",
+        "instructions": "Given the user goal, evidence already gathered, proposed tool and intent, expected cost tier, and expected latency, estimate the calibrated belief that this tool call will materially improve the answer beyond what is already known."
+      },
+      "primary_blocker": {
+        "type": "choice",
+        "instructions": "If the proposed tool is not worth running, choose the main reason; choose none when the tool is worth running.",
+        "criteria": {
+          "already_answered": "The available evidence is already enough to answer.",
+          "wrong_tool": "A different or cheaper tool would be more appropriate.",
+          "low_signal": "The proposed call is likely to return noisy, irrelevant, or low-value information.",
+          "user_not_needed": "The user did not ask for this depth or the extra evidence is not needed.",
+          "none": "No blocker; the tool is worth running."
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-fixture",
+    "answers": {
+      "tool_worth_it": {
+        "type": "noul",
+        "noul": 0.38
+      },
+      "primary_blocker": {
+        "type": "choice",
+        "choice": "already_answered",
+        "confidence": 0.82,
+        "probabilities": {
+          "already_answered": 0.69,
+          "wrong_tool": 0.08,
+          "low_signal": 0.13,
+          "user_not_needed": 0.06,
+          "none": 0.04
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "skip_tool",
+    "proceed": false,
+    "reason": "tool_worth_it=0.38 < 0.65; primary_blocker=already_answered",
+    "signals": {
+      "tool_worth_it": 0.38,
+      "primary_blocker": "already_answered",
+      "est_latency_ms": 39000,
+      "est_cost_tier": "high",
+      "gate_applies": true
+    },
+    "thresholds": {
+      "tool_worth_it_min": 0.65,
+      "gate_latency_ms_min": 2000,
+      "gate_when_est_cost_tier_not": "low"
+    }
+  }
+}

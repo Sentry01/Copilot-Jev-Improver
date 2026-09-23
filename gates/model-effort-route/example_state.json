@@ -1,0 +1,8 @@
+{
+  "user_request": "Find where the CLI formats gate decisions and make a one-line label change.",
+  "turn_kind": "edit",
+  "blast_radius": "single_file",
+  "context_size_tier": "medium",
+  "prior_attempts": 0,
+  "current_tier": "frontier_medium"
+}

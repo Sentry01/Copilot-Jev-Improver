@@ -1,0 +1,18 @@
+{
+  "user_request": "Summarize whether the new gate can run offline and what validation was performed.",
+  "draft": "The gate runs offline in fixture mode. I verified the CLI entrypoint and the importable decide(state) path with JEV_MODE=fixture, and both returned decisions from the local fixture without requiring an API key.",
+  "success_criteria": "Answer must say whether offline mode works, name the validation paths checked, and avoid claiming broader test coverage than was run.",
+  "evidence_sources": [
+    {
+      "tool": "bash",
+      "claim": "CLI fixture mode returned a decision without an API key",
+      "excerpt": "source=fixture ok=True action=allow_completion_claim proceed=True"
+    },
+    {
+      "tool": "python",
+      "claim": "Importable decide(state) returned a JSON outcome",
+      "excerpt": "\"source\": \"fixture\", \"decision\": {\"action\": \"allow_completion_claim\""
+    }
+  ],
+  "unresolved": "No full repository test suite was run."
+}

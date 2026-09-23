@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "name": "dry_context_read_budget",
+    "slug": "context-read-budget",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 17.2,
+    "error": null,
+    "as_of": "2026-09-23 18:30:19 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "Confirm the threshold for the context-read-budget gate in the spec.",
+      "target": "docs/cool-use-cases.md section 4",
+      "known_size_tier": "large",
+      "proposed_read": "full_file",
+      "already_read": "The headings and line range for section 4 are already known."
+    },
+    "questions": {
+      "full_read_justified": {
+        "type": "noul",
+        "instructions": "Given the goal, target, known size, proposed read, and already-read context, estimate the calibrated belief that reading the full file or full tree is genuinely needed rather than a bounded search or range."
+      },
+      "read_strategy": {
+        "type": "choice",
+        "instructions": "Choose the most context-efficient read strategy that still satisfies the goal.",
+        "criteria": {
+          "targeted_search": "Search narrowly for the needed symbol, phrase, or file path before reading content.",
+          "ranged_read": "Read only a bounded line range or focused section.",
+          "full_read": "Read the full file or scope because the whole content is justified.",
+          "already_have_it": "The needed information is already in context; skip the read."
+        }
+      },
+      "expected_relevance": {
+        "type": "score",
+        "instructions": "Score how relevant the proposed read scope is expected to be to the current goal.",
+        "criteria": [
+          "none",
+          "low",
+          "moderate",
+          "high",
+          "certain"
+        ]
+      }
+    }
+  },
+  "response": {
+    "model": "jev-fixture",
+    "answers": {
+      "full_read_justified": {
+        "type": "noul",
+        "noul": 0.31
+      },
+      "read_strategy": {
+        "type": "choice",
+        "choice": "ranged_read",
+        "confidence": 0.76,
+        "probabilities": {
+          "targeted_search": 0.21,
+          "ranged_read": 0.62,
+          "full_read": 0.09,
+          "already_have_it": 0.08
+        }
+      },
+      "expected_relevance": {
+        "type": "score",
+        "score": "high",
+        "confidence": 0.72,
+        "legend": [
+          "none",
+          "low",
+          "moderate",
+          "high",
+          "certain"
+        ],
+        "probabilities": {
+          "none": 0.01,
+          "low": 0.04,
+          "moderate": 0.19,
+          "high": 0.57,
+          "certain": 0.19
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "ranged_read",
+    "proceed": true,
+    "reason": "full_read_justified=0.31 < 0.70; follow read_strategy=ranged_read",
+    "signals": {
+      "full_read_justified": 0.31,
+      "read_strategy": "ranged_read",
+      "expected_relevance": "high",
+      "expected_relevance_index": 3
+    },
+    "thresholds": {
+      "full_read_justified_min": 0.7
+    }
+  }
+}

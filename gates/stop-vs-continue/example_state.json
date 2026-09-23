@@ -1,0 +1,8 @@
+{
+  "user_goal": "Explain why the gate fixture run is failing offline.",
+  "progress_summary": "The missing fixture path is identified, the runner behavior is understood, and the next fix is to add a fixture JSON.",
+  "open_questions": "No material unknowns remain for the answer.",
+  "steps_taken": 9,
+  "last_step_yield": "Confirmed the same missing-fixture warning as the previous command.",
+  "budget_tier": "normal"
+}

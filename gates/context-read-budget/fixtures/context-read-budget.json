@@ -1,0 +1,41 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 17.2,
+  "usage": {},
+  "answers": {
+    "full_read_justified": {
+      "type": "noul",
+      "noul": 0.31
+    },
+    "read_strategy": {
+      "type": "choice",
+      "choice": "ranged_read",
+      "confidence": 0.76,
+      "probabilities": {
+        "targeted_search": 0.21,
+        "ranged_read": 0.62,
+        "full_read": 0.09,
+        "already_have_it": 0.08
+      }
+    },
+    "expected_relevance": {
+      "type": "score",
+      "score": "high",
+      "confidence": 0.72,
+      "legend": [
+        "none",
+        "low",
+        "moderate",
+        "high",
+        "certain"
+      ],
+      "probabilities": {
+        "none": 0.01,
+        "low": 0.04,
+        "moderate": 0.19,
+        "high": 0.57,
+        "certain": 0.19
+      }
+    }
+  }
+}

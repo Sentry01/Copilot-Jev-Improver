@@ -1,0 +1,7 @@
+{
+  "user_goal": "Summarize whether the offline gate runner needs another network check.",
+  "already_have": "The fixture loader path, missing-file warning, and fail-open decision are already visible from the previous run.",
+  "proposed_tool": "web_search for current TypeSafe API examples before explaining local fixture behavior",
+  "est_cost_tier": "high",
+  "est_latency_ms": 39000
+}

@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "name": "dry_response_quality",
+    "slug": "response-quality",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 0.0,
+    "error": null,
+    "as_of": "2026-09-23 18:30:20 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "user_request": "Summarize whether the new gate can run offline and what validation was performed.",
+      "draft": "The gate runs offline in fixture mode. I verified the CLI entrypoint and the importable decide(state) path with JEV_MODE=fixture, and both returned decisions from the local fixture without requiring an API key.",
+      "success_criteria": "Answer must say whether offline mode works, name the validation paths checked, and avoid claiming broader test coverage than was run.",
+      "evidence_sources": [
+        {
+          "tool": "bash",
+          "claim": "CLI fixture mode returned a decision without an API key",
+          "excerpt": "source=fixture ok=True action=allow_completion_claim proceed=True"
+        },
+        {
+          "tool": "python",
+          "claim": "Importable decide(state) returned a JSON outcome",
+          "excerpt": "\"source\": \"fixture\", \"decision\": {\"action\": \"allow_completion_claim\""
+        }
+      ],
+      "unresolved": "No full repository test suite was run."
+    },
+    "questions": {
+      "ready_to_send": {
+        "type": "noul",
+        "instructions": "Given the user request, draft reply, success criteria, evidence sources, and unresolved items: does the draft answer the ask well enough to send now?"
+      },
+      "send_quality": {
+        "type": "score",
+        "instructions": "Rate the overall quality of the draft response for this user request, using the evidence sources to judge whether claims are supported.",
+        "criteria": [
+          "unusable",
+          "weak",
+          "adequate",
+          "good",
+          "excellent"
+        ]
+      },
+      "main_defect": {
+        "type": "choice",
+        "instructions": "If the draft should not be sent, what is the main defect?",
+        "criteria": {
+          "none": "No material defect",
+          "incomplete": "The draft omits required parts of the answer",
+          "vague": "The draft is too generic or hedged to be useful",
+          "unsupported": "The draft asserts claims not supported by the provided evidence sources",
+          "off_target": "The draft answers the wrong question or misses the user's intent",
+          "too_long": "The draft is unnecessarily long for the request"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-latest",
+    "answers": {
+      "ready_to_send": {
+        "type": "noul",
+        "noul": 0.77
+      },
+      "send_quality": {
+        "type": "score",
+        "score": "good",
+        "confidence": 0.75,
+        "legend": [
+          "unusable",
+          "weak",
+          "adequate",
+          "good",
+          "excellent"
+        ],
+        "probabilities": {
+          "unusable": 0.01,
+          "weak": 0.05,
+          "adequate": 0.17,
+          "good": 0.75,
+          "excellent": 0.02
+        }
+      },
+      "main_defect": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 0.8,
+        "probabilities": {
+          "none": 0.8,
+          "incomplete": 0.07,
+          "vague": 0.04,
+          "unsupported": 0.04,
+          "off_target": 0.03,
+          "too_long": 0.02
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "send_response",
+    "proceed": true,
+    "reason": "send: ready_to_send=0.77 >= 0.65 and send_quality=good >= adequate; evidence_sources=2",
+    "ready_to_send": 0.77,
+    "send_quality": "good",
+    "send_quality_index": 3,
+    "main_defect": "none",
+    "evidence_source_count": 2,
+    "thresholds": {
+      "ready_to_send_min": 0.65,
+      "send_quality_min": "adequate",
+      "send_quality_min_index": 2
+    }
+  }
+}

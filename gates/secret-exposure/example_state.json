@@ -1,0 +1,7 @@
+{
+  "proposed_output": "Write troubleshooting output containing API_TOKEN=<FAKE_TOKEN_FOR_DOCS_ONLY> into a public issue comment.",
+  "destination": "third_party",
+  "contains_env_reference": true,
+  "repo_visibility": "public",
+  "data_classification": "credential"
+}

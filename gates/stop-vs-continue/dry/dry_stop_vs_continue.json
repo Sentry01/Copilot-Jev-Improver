@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "name": "dry_stop_vs_continue",
+    "slug": "stop-vs-continue",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 16.7,
+    "error": null,
+    "as_of": "2026-09-23 18:30:20 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "user_goal": "Explain why the gate fixture run is failing offline.",
+      "progress_summary": "The missing fixture path is identified, the runner behavior is understood, and the next fix is to add a fixture JSON.",
+      "open_questions": "No material unknowns remain for the answer.",
+      "steps_taken": 9,
+      "last_step_yield": "Confirmed the same missing-fixture warning as the previous command.",
+      "budget_tier": "normal"
+    },
+    "questions": {
+      "should_stop": {
+        "type": "noul",
+        "instructions": "Given the original user goal, progress, open questions, steps taken, and latest yield, estimate the calibrated belief that continuing the current line of work adds little value."
+      },
+      "marginal_value": {
+        "type": "score",
+        "instructions": "Score the expected marginal value of one more autonomous step toward the user's goal.",
+        "criteria": [
+          "none",
+          "trivial",
+          "modest",
+          "substantial",
+          "critical"
+        ]
+      },
+      "stop_reason": {
+        "type": "choice",
+        "instructions": "Choose the best explanation for whether the agent should stop, re-plan, ask the user, or keep going.",
+        "criteria": {
+          "goal_met": "The user's goal is already satisfied enough to answer.",
+          "diminishing_returns": "Further autonomous steps are unlikely to add material value.",
+          "blocked_needs_user": "The next decision requires user input or permission.",
+          "wrong_approach": "The current approach is not working; stop this line and re-plan explicitly.",
+          "keep_going": "Continuing is still useful and aligned with the goal."
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-fixture",
+    "answers": {
+      "should_stop": {
+        "type": "noul",
+        "noul": 0.72
+      },
+      "marginal_value": {
+        "type": "score",
+        "score": "trivial",
+        "confidence": 0.81,
+        "legend": [
+          "none",
+          "trivial",
+          "modest",
+          "substantial",
+          "critical"
+        ],
+        "probabilities": {
+          "none": 0.21,
+          "trivial": 0.55,
+          "modest": 0.16,
+          "substantial": 0.06,
+          "critical": 0.02
+        }
+      },
+      "stop_reason": {
+        "type": "choice",
+        "choice": "diminishing_returns",
+        "confidence": 0.77,
+        "probabilities": {
+          "goal_met": 0.24,
+          "diminishing_returns": 0.58,
+          "blocked_needs_user": 0.04,
+          "wrong_approach": 0.03,
+          "keep_going": 0.11
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "stop",
+    "proceed": false,
+    "reason": "stop triggered: should_stop=0.72 >= 0.60 or marginal_value=trivial < modest; stop_reason=diminishing_returns",
+    "signals": {
+      "should_stop": 0.72,
+      "marginal_value": "trivial",
+      "marginal_value_index": 1,
+      "stop_reason": "diminishing_returns"
+    },
+    "thresholds": {
+      "should_stop_min": 0.6,
+      "marginal_value_continue_min": "modest"
+    }
+  }
+}
