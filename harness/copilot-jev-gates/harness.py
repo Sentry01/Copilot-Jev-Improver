@@ -218,7 +218,35 @@ def load_gate(slug: str) -> Any:
 
 
 def run_gate(slug: str, state: dict[str, Any]) -> dict[str, Any]:
+    """Run a gate inside the hook's time budget.
+
+    The CLI kills a command hook at `timeoutSec`, and a killed hook is treated
+    as fail-OPEN -- the tool proceeds. That is the wrong outcome for a safety
+    gate, so the gate must produce its own fail-mode decision *before* the CLI
+    loses patience. We constrain the Jev network call to a fraction of the hook
+    budget, leaving headroom for import, state building and JSON emission.
+
+    See docs/copilot-hook-api.md, "The timeout asymmetry".
+    """
+    os.environ.setdefault("JEV_TIMEOUT_S", str(gate_budget_s()))
     return load_gate(slug).decide(state)
+
+
+# Must stay comfortably below the smallest `timeoutSec` in hooks.json (10s).
+DEFAULT_HOOK_TIMEOUT_S = 10.0
+GATE_BUDGET_FRACTION = 0.6
+
+
+def gate_budget_s() -> float:
+    """Seconds a gate's network call may take before it must give up itself."""
+    raw = (os.environ.get("COPILOT_JEV_HOOK_TIMEOUT_S") or "").strip()
+    try:
+        hook_timeout = float(raw) if raw else DEFAULT_HOOK_TIMEOUT_S
+    except ValueError:
+        hook_timeout = DEFAULT_HOOK_TIMEOUT_S
+    if hook_timeout <= 0:
+        hook_timeout = DEFAULT_HOOK_TIMEOUT_S
+    return round(hook_timeout * GATE_BUDGET_FRACTION, 2)
 
 
 # --------------------------------------------------------------------------
@@ -247,6 +275,10 @@ def route_pre_tool_use(tool_name: str, tool_args: Any, cwd: str) -> Route | None
 
     if is_bash_read(tool_name, tool_args):
         return "context-read-budget", lambda p: _read_state(tool_args)
+
+    line_count = unbounded_large_read(tool_name, tool_args)
+    if line_count is not None:
+        return "context-read-budget", lambda p: _view_read_state(tool_args, line_count)
 
     if tool_name in EXPENSIVE_TOOLS:
         return "tool-worth-it", lambda p: _tool_worth_state(tool_name, tool_args)
@@ -330,6 +362,64 @@ def _read_state(tool_args: Any) -> dict[str, Any]:
         "proposed_read": "recursive_grep" if _READ.search(command) else "full_file",
         "already_read": "",
     }
+
+
+# `view` is a cheap tool and is deliberately NOT gated in general: it averages
+# 908ms, so adding a ~300-500ms gate to every read would be net-negative. The
+# one case worth intercepting is an *unbounded* read of a *large* file, because
+# measured input:output is 260.8:1 -- the cost of a session is the context it
+# accumulates, not the tokens it generates.
+#
+# The pre-filter is a local stat, costing microseconds, so the expensive gate
+# only runs on reads that are themselves expensive.
+LARGE_FILE_LINES = 600
+
+
+def unbounded_large_read(tool_name: str, tool_args: Any) -> int | None:
+    """Return the file's line count if this is an unbounded read of a big file."""
+    if tool_name != "view" or not isinstance(tool_args, dict):
+        return None
+    if tool_args.get("view_range"):
+        return None
+    if tool_args.get("forceReadLargeFiles"):
+        return None
+    path = tool_args.get("path")
+    if not isinstance(path, str) or not path:
+        return None
+    try:
+        target = Path(path)
+        if not target.is_file():
+            return None
+        # Bounded read: stop counting once the file is provably large enough.
+        count = 0
+        with target.open("rb") as handle:
+            for count, _ in enumerate(handle, 1):
+                if count > LARGE_FILE_LINES:
+                    break
+        return count if count > LARGE_FILE_LINES else None
+    except (OSError, ValueError):
+        return None
+
+
+def _view_read_state(tool_args: dict[str, Any], line_count: int) -> dict[str, Any]:
+    return {
+        "goal": "read a source file into context",
+        "target": str(tool_args.get("path") or "unknown"),
+        "known_size_tier": f"{line_count}+ lines",
+        "proposed_read": "full_file",
+        "already_read": "",
+    }
+
+
+def ranged_read_args(tool_args: dict[str, Any], window: int = 200) -> dict[str, Any]:
+    """Rewrite an unbounded read into a bounded one.
+
+    Redirecting beats denying: the model gets usable output instead of an error
+    it has to reason its way around, and the context cost is capped.
+    """
+    modified = dict(tool_args)
+    modified["view_range"] = [1, window]
+    return modified
 
 
 def _tool_worth_state(tool_name: str, tool_args: Any) -> dict[str, Any]:

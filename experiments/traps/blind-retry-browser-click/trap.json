@@ -1,0 +1,52 @@
+{
+  "slug": "blind-retry-browser-click",
+  "title": "Blind retry of a browser click",
+  "gate": "retry-worth-it",
+  "state": {
+    "failed_tool": "browser_click",
+    "error_summary": "Click failed: element not found for selector text=Submit.",
+    "attempt_number": 2,
+    "change_since_last_attempt": "",
+    "tool_historical_failure_rate": 0.786,
+    "alternative_paths": "Take a fresh accessibility snapshot, use keyboard navigation, or inspect whether authentication/page state changed."
+  },
+  "expected_action": "do_not_retry",
+  "expected_proceed": false,
+  "expected_source": "fixture",
+  "falsifier": "If unchanged retries after identical browser_click failures regularly succeed, or if the gate blocks a retry that has a concrete changed selector/snapshot, the trap is not helping.",
+  "requires_policy_short_circuit": false,
+  "fixture_honesty": "These answers are an offline fixture, not live Jev evidence.",
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "retry_will_succeed": {
+      "type": "noul",
+      "noul": 0.18
+    },
+    "failure_class": {
+      "type": "choice",
+      "choice": "wrong_target",
+      "confidence": 0.74,
+      "probabilities": {
+        "transient": 0.06,
+        "auth": 0.05,
+        "wrong_target": 0.74,
+        "unsupported": 0.08,
+        "malformed_input": 0.07
+      }
+    },
+    "next_action": {
+      "type": "choice",
+      "choice": "retry_same",
+      "confidence": 0.65,
+      "probabilities": {
+        "retry_same": 0.65,
+        "retry_adjusted": 0.12,
+        "switch_tool": 0.15,
+        "ask_user": 0.03,
+        "abandon": 0.05
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@ surface is pinned here.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -21,6 +22,8 @@ sys.path.insert(0, str(HARNESS_DIR))
 
 from harness import (  # noqa: E402
     CHEAP_TOOLS,
+    DEFAULT_HOOK_TIMEOUT_S,
+    gate_budget_s,
     is_bash_read,
     is_destructive,
     is_emit,
@@ -239,3 +242,162 @@ class HookProcessTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TimeoutBudgetTests(unittest.TestCase):
+    """A preToolUse hook timeout is fail-OPEN, even for safety gates.
+
+    The CLI kills a command hook at `timeoutSec` and lets the tool proceed.
+    A safety gate therefore cannot rely on being allowed to finish: it has to
+    return its own fail-closed decision strictly inside the budget. These
+    tests pin the arithmetic that guarantees headroom.
+    """
+
+    def setUp(self):
+        self._saved = os.environ.get("COPILOT_JEV_HOOK_TIMEOUT_S")
+        os.environ.pop("COPILOT_JEV_HOOK_TIMEOUT_S", None)
+
+    def tearDown(self):
+        os.environ.pop("COPILOT_JEV_HOOK_TIMEOUT_S", None)
+        if self._saved is not None:
+            os.environ["COPILOT_JEV_HOOK_TIMEOUT_S"] = self._saved
+
+    def test_budget_leaves_headroom_under_default_hook_timeout(self):
+        budget = gate_budget_s()
+        self.assertLess(budget, DEFAULT_HOOK_TIMEOUT_S)
+        self.assertGreaterEqual(DEFAULT_HOOK_TIMEOUT_S - budget, 2.0,
+                                "need slack for import, state building and emit")
+
+    def test_budget_scales_with_configured_timeout(self):
+        os.environ["COPILOT_JEV_HOOK_TIMEOUT_S"] = "30"
+        self.assertEqual(gate_budget_s(), 18.0)
+
+    def test_malformed_budget_falls_back_safely(self):
+        for value in ("garbage", "-5", "0", ""):
+            with self.subTest(value=value):
+                os.environ["COPILOT_JEV_HOOK_TIMEOUT_S"] = value
+                self.assertEqual(gate_budget_s(), DEFAULT_HOOK_TIMEOUT_S * 0.6)
+
+    def test_budget_is_below_every_gate_running_hook_timeout(self):
+        """Regression: jev_client defaulted to 60s under a 10s hook timeout.
+
+        Only hooks that actually invoke a gate are constrained. sessionStart
+        injects static context and never calls Jev, so its tighter 5s budget
+        is deliberate and not a violation.
+        """
+        config = json.loads((HOOKS_DIR / "hooks.json").read_text(encoding="utf-8"))
+        gate_running = {"preToolUse", "postToolUseFailure", "agentStop"}
+        checked = 0
+        for event, entries in config["hooks"].items():
+            if event not in gate_running:
+                continue
+            for entry in entries:
+                timeout = entry.get("timeoutSec")
+                if not timeout:
+                    continue
+                checked += 1
+                with self.subTest(event=event, timeoutSec=timeout):
+                    self.assertLess(gate_budget_s(), timeout,
+                                    "gate could be killed before returning fail-closed")
+        self.assertEqual(checked, len(gate_running), "every gate-running hook needs a timeoutSec")
+
+    def test_jev_client_honours_the_budget_env_var(self):
+        sys.path.insert(0, str(REPO_ROOT))
+        from gates.common import jev_client
+
+        saved = os.environ.get("JEV_TIMEOUT_S")
+        try:
+            os.environ["JEV_TIMEOUT_S"] = "4.5"
+            self.assertEqual(jev_client._timeout_s(), 4.5)
+            for bad in ("bad", "0", "-1", ""):
+                os.environ["JEV_TIMEOUT_S"] = bad
+                self.assertEqual(jev_client._timeout_s(), jev_client.DEFAULT_TIMEOUT_S)
+        finally:
+            os.environ.pop("JEV_TIMEOUT_S", None)
+            if saved is not None:
+                os.environ["JEV_TIMEOUT_S"] = saved
+
+
+class LargeReadRewriteTests(unittest.TestCase):
+    """`view` is cheap and ungated, except for unbounded reads of large files.
+
+    Measured input:output is 260.8:1, so context is the dominant cost. The
+    pre-filter is a local stat so the common small read stays free, and the
+    gate redirects rather than denies -- the model still gets its content.
+    """
+
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.mkdtemp()
+        self.big = Path(self.tmp) / "big.py"
+        self.big.write_text("# line\n" * 1500, encoding="utf-8")
+        self.small = Path(self.tmp) / "small.py"
+        self.small.write_text("# line\n" * 20, encoding="utf-8")
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_small_file_is_not_gated(self):
+        from harness import unbounded_large_read
+        self.assertIsNone(unbounded_large_read("view", {"path": str(self.small)}))
+
+    def test_large_unbounded_read_is_gated(self):
+        from harness import unbounded_large_read
+        self.assertIsNotNone(unbounded_large_read("view", {"path": str(self.big)}))
+
+    def test_already_ranged_read_is_not_gated(self):
+        from harness import unbounded_large_read
+        self.assertIsNone(
+            unbounded_large_read("view", {"path": str(self.big), "view_range": [1, 50]})
+        )
+
+    def test_explicit_force_flag_is_respected(self):
+        """An explicit request to read the whole file is the user's call."""
+        from harness import unbounded_large_read
+        self.assertIsNone(
+            unbounded_large_read("view", {"path": str(self.big), "forceReadLargeFiles": True})
+        )
+
+    def test_missing_or_bad_paths_never_raise(self):
+        from harness import unbounded_large_read
+        for args in ({}, {"path": ""}, {"path": "/nonexistent/x"}, {"path": self.tmp}, None, "str"):
+            with self.subTest(args=args):
+                self.assertIsNone(unbounded_large_read("view", args))
+
+    def test_other_tools_are_untouched(self):
+        from harness import unbounded_large_read
+        self.assertIsNone(unbounded_large_read("bash", {"path": str(self.big)}))
+
+    def test_rewrite_bounds_the_read_and_preserves_other_args(self):
+        from harness import ranged_read_args
+        out = ranged_read_args({"path": str(self.big), "other": "keep"})
+        self.assertEqual(out["view_range"], [1, 200])
+        self.assertEqual(out["other"], "keep")
+
+    def test_rewrite_does_not_mutate_the_original(self):
+        from harness import ranged_read_args
+        original = {"path": str(self.big)}
+        ranged_read_args(original)
+        self.assertNotIn("view_range", original)
+
+    def _hook(self, payload: dict) -> dict:
+        env = dict(os.environ, JEV_MODE="fixture")
+        proc = subprocess.run(
+            [sys.executable, "-B", str(HOOKS_DIR / "pre_tool_use.py")],
+            input=json.dumps(payload), capture_output=True, text=True, env=env, timeout=60,
+        )
+        self.assertEqual(proc.returncode, 0, "hooks must always exit 0")
+        lines = [l for l in proc.stdout.splitlines()
+                 if l.strip() and '"type": "progress"' not in l]
+        return json.loads("\n".join(lines))
+
+    def test_end_to_end_large_read_is_rewritten_not_denied(self):
+        out = self._hook({"toolName": "view", "toolArgs": {"path": str(self.big)}, "cwd": self.tmp})
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertEqual(out["modifiedArgs"]["view_range"], [1, 200])
+
+    def test_end_to_end_small_read_is_untouched(self):
+        out = self._hook({"toolName": "view", "toolArgs": {"path": str(self.small)}, "cwd": self.tmp})
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertNotIn("modifiedArgs", out)

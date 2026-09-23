@@ -32,9 +32,11 @@ from harness import (  # noqa: E402
     emit,
     field,
     progress,
+    ranged_read_args,
     read_payload,
     route_pre_tool_use,
     run_gate,
+    unbounded_large_read,
     violates_read_only,
 )
 
@@ -65,7 +67,11 @@ def main() -> int:
         )
         return 0
 
-    if tool_name in CHEAP_TOOLS:
+    # Cheap tools are not worth a ~300-500ms gate. The one exception is an
+    # unbounded read of a large file: `view` is cheap in wall-clock but the
+    # context it pulls in is the dominant cost driver (input:output = 260.8:1).
+    # The exception is detected with a local stat, so the common case stays free.
+    if tool_name in CHEAP_TOOLS and unbounded_large_read(tool_name, tool_args) is None:
         emit(allow())
         return 0
 
@@ -93,24 +99,30 @@ def main() -> int:
             emit(allow())
         return 0
 
-    emit(to_decision(slug, outcome))
+    emit(to_decision(slug, outcome, tool_name, tool_args))
     return 0
 
 
-def to_decision(slug: str, outcome: dict) -> dict:
+def to_decision(slug: str, outcome: dict, tool_name: str = "", tool_args: object = None) -> dict:
     decision = outcome.get("decision") or {}
     proceed = decision.get("proceed", outcome.get("proceed", True))
     reason = decision.get("reason") or outcome.get("reason") or "no reason supplied"
     source = outcome.get("source", "unknown")
+    action = decision.get("action") or outcome.get("action") or "skip"
 
     if proceed:
         modified = decision.get("modified_args") or outcome.get("modified_args")
         result = allow()
+        # A gate decides the *strategy*; the harness knows how to express that
+        # strategy as this particular tool's arguments. Rewriting the call is
+        # strictly better than allowing a wasteful one: same turn, capped cost.
+        if not modified and action == "ranged_read" and isinstance(tool_args, dict):
+            if unbounded_large_read(tool_name, tool_args) is not None:
+                modified = ranged_read_args(tool_args)
         if isinstance(modified, dict) and modified:
             result["modifiedArgs"] = modified
         return result
 
-    action = decision.get("action") or outcome.get("action") or "skip"
     message = (
         f"Blocked by Jev gate '{slug}' (source={source}): {reason}. "
         f"Suggested action: {action}. "

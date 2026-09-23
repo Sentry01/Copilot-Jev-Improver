@@ -14,7 +14,29 @@ from .fixtures import load_fixture
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
+
+# A Jev call made from inside a Copilot `preToolUse` hook is on a hard clock.
+# The CLI kills a command hook at its `timeoutSec`, and a *timeout* is always
+# fail-OPEN -- even for a safety gate, and even for an admin policy hook. A
+# gate that gets killed therefore lets the tool through, which is exactly the
+# opposite of what a safety gate must do.
+#
+# So the network call must finish, and the gate must return its own fail-mode
+# decision, strictly inside the hook's budget. The harness sets JEV_TIMEOUT_S
+# well below the configured timeoutSec for this reason. Only the standalone
+# (non-hook) path gets the relaxed default.
 DEFAULT_TIMEOUT_S = 60
+
+
+def _timeout_s() -> float:
+    raw = (os.environ.get("JEV_TIMEOUT_S") or "").strip()
+    if not raw:
+        return DEFAULT_TIMEOUT_S
+    try:
+        value = float(raw)
+    except ValueError:
+        return DEFAULT_TIMEOUT_S
+    return value if value > 0 else DEFAULT_TIMEOUT_S
 
 log = logging.getLogger("gates.jev_client")
 
@@ -114,9 +136,11 @@ def call_jev(
     questions: dict[str, Any],
     *,
     model: str = MODEL,
-    timeout_s: float = DEFAULT_TIMEOUT_S,
+    timeout_s: float | None = None,
     fixture_path: Path | str | None = None,
 ) -> dict[str, Any]:
+    if timeout_s is None:
+        timeout_s = _timeout_s()
     request_sans_auth = {
         "model": model,
         "state": state,

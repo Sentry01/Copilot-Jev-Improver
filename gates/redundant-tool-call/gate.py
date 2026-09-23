@@ -2,6 +2,7 @@
 """redundant-tool-call gate — thin wrapper around shared runner."""
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -37,10 +38,48 @@ def _choice(answers: dict[str, Any], key: str) -> str | None:
     return answer.get("choice") if isinstance(answer, dict) else None
 
 
+_MUTATION_TOKENS = ("mutation", "mutated", "after edit", "edited", "changed",
+                    "modified", "wrote", "write completed")
+
+# "no intervening mutation" contains "mutation". Naive substring matching reads
+# that as evidence of a mutation and concludes a redundant re-read is
+# legitimate -- inverting the gate's entire purpose. This is the same failure
+# as the harness's read-only bug, where "SendMessageToChannel" contained "get".
+_NEGATORS = ("no", "not", "never", "without", "zero", "none", "n/a", "hasn't",
+             "hasnt", "haven't", "havent", "didn't", "didnt", "wasn't", "wasnt")
+_NEGATION_WINDOW = 4
+
+
 def _mutation_hint(state: dict[str, Any]) -> bool:
+    """Did something change between the prior call and this one?
+
+    Prefers an explicit structured signal. Sniffing prose is a fallback, and a
+    negation-aware one: a gate should never infer the opposite of what the
+    state says.
+    """
+    explicit = state.get("mutation_between_calls")
+    if isinstance(explicit, bool):
+        return explicit
+
     text = " ".join(str(state.get(k, "")) for k in ("prior_calls", "elapsed_since_prior"))
     lowered = text.lower()
-    return any(token in lowered for token in ("mutation", "mutated", "after edit", "edited", "changed", "modified", "wrote", "write completed"))
+    for token in _MUTATION_TOKENS:
+        start = 0
+        while (idx := lowered.find(token, start)) != -1:
+            start = idx + 1
+            # A negator only negates within its own clause. "no mutation, then
+            # later edited" does contain a real edit, so the window must stop
+            # at the clause boundary rather than counting back a fixed number
+            # of words.
+            clause_start = max(
+                (lowered.rfind(sep, 0, idx) for sep in (",", ";", ".", " then ", " but ", " and ")),
+                default=-1,
+            )
+            clause = lowered[clause_start + 1:idx]
+            window = re.findall(r"[a-z']+", clause)[-_NEGATION_WINDOW:]
+            if not any(negator in window for negator in _NEGATORS):
+                return True
+    return False
 
 
 def _default_decision(config: dict[str, Any], reason: str, *, signals: dict[str, Any]) -> dict[str, Any]:

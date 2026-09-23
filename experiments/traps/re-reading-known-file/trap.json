@@ -1,0 +1,38 @@
+{
+  "slug": "re-reading-known-file",
+  "title": "Re-reading a known file",
+  "gate": "redundant-tool-call",
+  "state": {
+    "proposed_call": "view docs/cool-use-cases.md lines 1-260",
+    "prior_calls": "The same file range was read earlier this turn and no write touched docs/cool-use-cases.md afterward.",
+    "elapsed_since_prior": "less than 10 minutes; no intervening mutation",
+    "volatility": "static"
+  },
+  "expected_action": "reuse_cache",
+  "expected_proceed": false,
+  "expected_source": "fixture",
+  "falsifier": "If the file changed after the earlier read, or the previous read was outside the needed range, reusing cache would be stale and the trap should fail.",
+  "requires_policy_short_circuit": false,
+  "fixture_honesty": "These answers are an offline fixture, not live Jev evidence.",
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "is_redundant": {
+      "type": "noul",
+      "noul": 0.93
+    },
+    "reuse_strategy": {
+      "type": "choice",
+      "choice": "reuse_cache",
+      "confidence": 0.88,
+      "probabilities": {
+        "reuse_cache": 0.88,
+        "narrow_scope": 0.06,
+        "call_anyway_stale": 0.04,
+        "call_anyway_new": 0.02
+      }
+    }
+  },
+  "current_status": "failing: redundant-tool-call _mutation_hint treats \"no intervening mutation\" as a positive mutation signal, so the gate calls the tool instead of reusing cache."
+}

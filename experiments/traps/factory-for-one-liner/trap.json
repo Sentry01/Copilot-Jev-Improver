@@ -1,0 +1,52 @@
+{
+  "slug": "factory-for-one-liner",
+  "title": "Factory for a one-liner",
+  "gate": "subagent-spawn",
+  "state": {
+    "task_description": "Spawn a factory fleet to change one typo in README copy.",
+    "context_transfer_size": "Small: the parent already knows the file, typo, and desired replacement.",
+    "parent_can_do_inline": "Yes. It is one bounded edit and one verification read.",
+    "parallelism_benefit": "None; there are no independent workstreams.",
+    "spawn_kind": "factory_fleet",
+    "writes_to_shared_tree": false
+  },
+  "expected_action": "inline",
+  "expected_proceed": false,
+  "expected_source": "fixture",
+  "falsifier": "If the one-line task actually needs independent research, special tooling, or true parallelism, inline execution could be slower or lower quality and the trap is invalid.",
+  "requires_policy_short_circuit": false,
+  "fixture_honesty": "These answers are an offline fixture, not live Jev evidence.",
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "spawn_justified": {
+      "type": "noul",
+      "noul": 0.11
+    },
+    "spawn_reason": {
+      "type": "choice",
+      "choice": "should_inline",
+      "confidence": 0.9,
+      "probabilities": {
+        "context_isolation": 0.02,
+        "true_parallelism": 0.01,
+        "specialised_skill": 0.02,
+        "underspecified": 0.05,
+        "should_inline": 0.9
+      }
+    },
+    "expected_multiplier": {
+      "type": "score",
+      "score": "1x",
+      "confidence": 0.82,
+      "probabilities": {
+        "1x": 0.82,
+        "2x": 0.13,
+        "5x": 0.04,
+        "10x": 0.01,
+        "20x_plus": 0.0
+      }
+    }
+  }
+}
