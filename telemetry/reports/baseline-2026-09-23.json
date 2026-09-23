@@ -1,0 +1,664 @@
+{
+  "as_of": "2026-09-23 18:14 AEST",
+  "window": "-30 days",
+  "source": "local session store (assistant_usage_events)",
+  "redaction": "aggregate-only; ALLOWED_COLUMNS enforced",
+  "headlines": [
+    {
+      "measure": "Dominant model/effort pair",
+      "value": "`claude-opus-5 @ high` = 50.3% of AI Units (3861 requests, 19.52 AIU/req)"
+    },
+    {
+      "measure": "Most expensive per request",
+      "value": "`gpt-6-astra @ xhigh` = 42.67 AIU/req (561 requests)"
+    },
+    {
+      "measure": "Autonomous turns per user turn",
+      "value": "13.5 (6398 agent vs 473 user requests)"
+    },
+    {
+      "measure": "Cache hit rate",
+      "value": "94.45% of input tokens served from cache"
+    },
+    {
+      "measure": "Input:output token ratio",
+      "value": "260.8:1 — cost is context, not generation"
+    },
+    {
+      "measure": "Spend concentration",
+      "value": "top session = 24.81% of all AI Units; top 15 = 77.92%"
+    },
+    {
+      "measure": "Subagent share of spend",
+      "value": "9.2% of AI Units ran in delegated lanes"
+    }
+  ],
+  "results": {
+    "01-cost-by-model-effort": [
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "high",
+        "requests": 3861,
+        "aiu": 75376.35,
+        "aiu_per_request": 19.52,
+        "pct_of_aiu": 50.3
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "xhigh",
+        "requests": 561,
+        "aiu": 23936.28,
+        "aiu_per_request": 42.67,
+        "pct_of_aiu": 15.97
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "medium",
+        "requests": 731,
+        "aiu": 15381.39,
+        "aiu_per_request": 21.04,
+        "pct_of_aiu": 10.26
+      },
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "medium",
+        "requests": 833,
+        "aiu": 15074.95,
+        "aiu_per_request": 18.1,
+        "pct_of_aiu": 10.06
+      },
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "xhigh",
+        "requests": 777,
+        "aiu": 10584.62,
+        "aiu_per_request": 13.62,
+        "pct_of_aiu": 7.06
+      },
+      {
+        "model": "claude-opus-4.8",
+        "reasoning_effort": "medium",
+        "requests": 198,
+        "aiu": 2813.04,
+        "aiu_per_request": 14.21,
+        "pct_of_aiu": 1.88
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "high",
+        "requests": 68,
+        "aiu": 1359.77,
+        "aiu_per_request": 20.0,
+        "pct_of_aiu": 0.91
+      },
+      {
+        "model": "claude-opus-4.7",
+        "reasoning_effort": "high",
+        "requests": 223,
+        "aiu": 982.01,
+        "aiu_per_request": 4.4,
+        "pct_of_aiu": 0.66
+      },
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "(none)",
+        "requests": 9,
+        "aiu": 956.8,
+        "aiu_per_request": 106.31,
+        "pct_of_aiu": 0.64
+      },
+      {
+        "model": "claude-opus-5.5",
+        "reasoning_effort": "xhigh",
+        "requests": 100,
+        "aiu": 804.47,
+        "aiu_per_request": 8.04,
+        "pct_of_aiu": 0.54
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "medium",
+        "requests": 168,
+        "aiu": 707.53,
+        "aiu_per_request": 4.21,
+        "pct_of_aiu": 0.47
+      },
+      {
+        "model": "gpt-5.5",
+        "reasoning_effort": "high",
+        "requests": 50,
+        "aiu": 498.86,
+        "aiu_per_request": 9.98,
+        "pct_of_aiu": 0.33
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "(none)",
+        "requests": 76,
+        "aiu": 281.63,
+        "aiu_per_request": 3.71,
+        "pct_of_aiu": 0.19
+      },
+      {
+        "model": "gpt-5.5",
+        "reasoning_effort": "xhigh",
+        "requests": 28,
+        "aiu": 184.66,
+        "aiu_per_request": 6.6,
+        "pct_of_aiu": 0.12
+      },
+      {
+        "model": "claude-opus-4.7",
+        "reasoning_effort": "xhigh",
+        "requests": 6,
+        "aiu": 177.47,
+        "aiu_per_request": 29.58,
+        "pct_of_aiu": 0.12
+      },
+      {
+        "model": "claude-sonnet-5",
+        "reasoning_effort": "medium",
+        "requests": 37,
+        "aiu": 176.68,
+        "aiu_per_request": 4.78,
+        "pct_of_aiu": 0.12
+      },
+      {
+        "model": "claude-sonnet-5",
+        "reasoning_effort": "xhigh",
+        "requests": 18,
+        "aiu": 140.32,
+        "aiu_per_request": 7.8,
+        "pct_of_aiu": 0.09
+      },
+      {
+        "model": "claude-sonnet-4.6",
+        "reasoning_effort": "medium",
+        "requests": 18,
+        "aiu": 96.28,
+        "aiu_per_request": 5.35,
+        "pct_of_aiu": 0.06
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "(none)",
+        "requests": 1,
+        "aiu": 50.95,
+        "aiu_per_request": 50.95,
+        "pct_of_aiu": 0.03
+      },
+      {
+        "model": "gpt-5.4",
+        "reasoning_effort": "high",
+        "requests": 14,
+        "aiu": 47.24,
+        "aiu_per_request": 3.37,
+        "pct_of_aiu": 0.03
+      },
+      {
+        "model": "gpt-5.6-sol-fast",
+        "reasoning_effort": "low",
+        "requests": 10,
+        "aiu": 43.63,
+        "aiu_per_request": 4.36,
+        "pct_of_aiu": 0.03
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "reasoning_effort": "medium",
+        "requests": 127,
+        "aiu": 41.91,
+        "aiu_per_request": 0.33,
+        "pct_of_aiu": 0.03
+      },
+      {
+        "model": "claude-opus-5.5",
+        "reasoning_effort": "(none)",
+        "requests": 2,
+        "aiu": 40.33,
+        "aiu_per_request": 20.17,
+        "pct_of_aiu": 0.03
+      },
+      {
+        "model": "gpt-5.4",
+        "reasoning_effort": "medium",
+        "requests": 9,
+        "aiu": 33.47,
+        "aiu_per_request": 3.72,
+        "pct_of_aiu": 0.02
+      },
+      {
+        "model": "claude-haiku-4.5",
+        "reasoning_effort": "(none)",
+        "requests": 31,
+        "aiu": 27.55,
+        "aiu_per_request": 0.89,
+        "pct_of_aiu": 0.02
+      },
+      {
+        "model": "gpt-5.6-sol-fast",
+        "reasoning_effort": "high",
+        "requests": 1,
+        "aiu": 12.87,
+        "aiu_per_request": 12.87,
+        "pct_of_aiu": 0.01
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "reasoning_effort": "(none)",
+        "requests": 13,
+        "aiu": 6.5,
+        "aiu_per_request": 0.5,
+        "pct_of_aiu": 0.0
+      },
+      {
+        "model": "claude-sonnet-5",
+        "reasoning_effort": "high",
+        "requests": 3,
+        "aiu": 6.2,
+        "aiu_per_request": 2.07,
+        "pct_of_aiu": 0.0
+      },
+      {
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "(none)",
+        "requests": 1,
+        "aiu": 0.65,
+        "aiu_per_request": 0.65,
+        "pct_of_aiu": 0.0
+      },
+      {
+        "model": "qwen3.8-27b-aeon:q5km",
+        "reasoning_effort": "(none)",
+        "requests": 7,
+        "aiu": null,
+        "aiu_per_request": null,
+        "pct_of_aiu": null
+      }
+    ],
+    "02-initiator-split": [
+      {
+        "initiator": "agent",
+        "requests": 6398,
+        "aiu": 104250.34,
+        "aiu_per_request": 16.29,
+        "avg_duration_ms": 11943.0,
+        "avg_ttft_ms": 5590.0
+      },
+      {
+        "initiator": "user",
+        "requests": 473,
+        "aiu": 30289.71,
+        "aiu_per_request": 64.04,
+        "avg_duration_ms": 13690.0,
+        "avg_ttft_ms": 8785.0
+      },
+      {
+        "initiator": "sub-agent",
+        "requests": 993,
+        "aiu": 13849.24,
+        "aiu_per_request": 13.95,
+        "avg_duration_ms": 13154.0,
+        "avg_ttft_ms": 6040.0
+      },
+      {
+        "initiator": "compaction",
+        "requests": 13,
+        "aiu": 1048.74,
+        "aiu_per_request": 80.67,
+        "avg_duration_ms": 72728.0,
+        "avg_ttft_ms": null
+      },
+      {
+        "initiator": "(none)",
+        "requests": 104,
+        "aiu": 406.37,
+        "aiu_per_request": 3.91,
+        "avg_duration_ms": 23214.0,
+        "avg_ttft_ms": 5326.0
+      }
+    ],
+    "03-token-shape-and-cache": [
+      {
+        "input_mtok": 1436.2,
+        "cache_read_mtok": 1356.43,
+        "cache_write_mtok": 77.14,
+        "output_mtok": 5.51,
+        "reasoning_mtok": 1.71,
+        "cache_pct": 94.45,
+        "input_output_ratio": 260.8
+      }
+    ],
+    "04-session-cost-concentration": [
+      {
+        "rank": 1,
+        "aiu": 37174.63,
+        "requests": 1290,
+        "input_mtok": 439.37,
+        "pct_of_aiu": 24.81,
+        "cumulative_pct": 24.81
+      },
+      {
+        "rank": 2,
+        "aiu": 18416.59,
+        "requests": 538,
+        "input_mtok": 93.97,
+        "pct_of_aiu": 12.29,
+        "cumulative_pct": 37.1
+      },
+      {
+        "rank": 3,
+        "aiu": 10527.99,
+        "requests": 527,
+        "input_mtok": 147.4,
+        "pct_of_aiu": 7.03,
+        "cumulative_pct": 44.13
+      },
+      {
+        "rank": 4,
+        "aiu": 7350.49,
+        "requests": 343,
+        "input_mtok": 46.34,
+        "pct_of_aiu": 4.91,
+        "cumulative_pct": 49.03
+      },
+      {
+        "rank": 5,
+        "aiu": 7170.55,
+        "requests": 352,
+        "input_mtok": 40.16,
+        "pct_of_aiu": 4.79,
+        "cumulative_pct": 53.82
+      },
+      {
+        "rank": 6,
+        "aiu": 5870.67,
+        "requests": 222,
+        "input_mtok": 31.04,
+        "pct_of_aiu": 3.92,
+        "cumulative_pct": 57.73
+      },
+      {
+        "rank": 7,
+        "aiu": 4662.52,
+        "requests": 135,
+        "input_mtok": 20.32,
+        "pct_of_aiu": 3.11,
+        "cumulative_pct": 60.85
+      },
+      {
+        "rank": 8,
+        "aiu": 4124.85,
+        "requests": 262,
+        "input_mtok": 51.96,
+        "pct_of_aiu": 2.75,
+        "cumulative_pct": 63.6
+      },
+      {
+        "rank": 9,
+        "aiu": 3943.63,
+        "requests": 232,
+        "input_mtok": 39.89,
+        "pct_of_aiu": 2.63,
+        "cumulative_pct": 66.23
+      },
+      {
+        "rank": 10,
+        "aiu": 3897.23,
+        "requests": 224,
+        "input_mtok": 45.67,
+        "pct_of_aiu": 2.6,
+        "cumulative_pct": 68.83
+      },
+      {
+        "rank": 11,
+        "aiu": 3392.42,
+        "requests": 173,
+        "input_mtok": 30.9,
+        "pct_of_aiu": 2.26,
+        "cumulative_pct": 71.09
+      },
+      {
+        "rank": 12,
+        "aiu": 3078.24,
+        "requests": 324,
+        "input_mtok": 47.92,
+        "pct_of_aiu": 2.05,
+        "cumulative_pct": 73.15
+      },
+      {
+        "rank": 13,
+        "aiu": 2986.37,
+        "requests": 188,
+        "input_mtok": 33.39,
+        "pct_of_aiu": 1.99,
+        "cumulative_pct": 75.14
+      },
+      {
+        "rank": 14,
+        "aiu": 2234.02,
+        "requests": 126,
+        "input_mtok": 24.14,
+        "pct_of_aiu": 1.49,
+        "cumulative_pct": 76.63
+      },
+      {
+        "rank": 15,
+        "aiu": 1922.05,
+        "requests": 116,
+        "input_mtok": 16.06,
+        "pct_of_aiu": 1.28,
+        "cumulative_pct": 77.92
+      }
+    ],
+    "05-latency-profile": [
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "high",
+        "requests": 3861,
+        "avg_duration_ms": 11291.0,
+        "avg_ttft_ms": 5343.0,
+        "max_duration_ms": 501543,
+        "total_seconds": 43593.0
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "xhigh",
+        "requests": 561,
+        "avg_duration_ms": 28370.0,
+        "avg_ttft_ms": 15865.0,
+        "max_duration_ms": 234741,
+        "total_seconds": 15916.0
+      },
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "xhigh",
+        "requests": 777,
+        "avg_duration_ms": 11080.0,
+        "avg_ttft_ms": 4669.0,
+        "max_duration_ms": 169590,
+        "total_seconds": 8609.0
+      },
+      {
+        "model": "claude-opus-5",
+        "reasoning_effort": "medium",
+        "requests": 833,
+        "avg_duration_ms": 10185.0,
+        "avg_ttft_ms": 4264.0,
+        "max_duration_ms": 308700,
+        "total_seconds": 8484.0
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "medium",
+        "requests": 731,
+        "avg_duration_ms": 11531.0,
+        "avg_ttft_ms": 6694.0,
+        "max_duration_ms": 109519,
+        "total_seconds": 8429.0
+      },
+      {
+        "model": "gpt-6-astra",
+        "reasoning_effort": "high",
+        "requests": 68,
+        "avg_duration_ms": 27518.0,
+        "avg_ttft_ms": 16077.0,
+        "max_duration_ms": 274841,
+        "total_seconds": 1871.0
+      },
+      {
+        "model": "claude-opus-4.8",
+        "reasoning_effort": "medium",
+        "requests": 198,
+        "avg_duration_ms": 8868.0,
+        "avg_ttft_ms": 4151.0,
+        "max_duration_ms": 100564,
+        "total_seconds": 1756.0
+      },
+      {
+        "model": "claude-opus-4.7",
+        "reasoning_effort": "high",
+        "requests": 223,
+        "avg_duration_ms": 7367.0,
+        "avg_ttft_ms": 3188.0,
+        "max_duration_ms": 73780,
+        "total_seconds": 1643.0
+      },
+      {
+        "model": "claude-opus-5.5",
+        "reasoning_effort": "xhigh",
+        "requests": 100,
+        "avg_duration_ms": 15458.0,
+        "avg_ttft_ms": 4925.0,
+        "max_duration_ms": 171424,
+        "total_seconds": 1546.0
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "medium",
+        "requests": 168,
+        "avg_duration_ms": 7721.0,
+        "avg_ttft_ms": 5578.0,
+        "max_duration_ms": 23970,
+        "total_seconds": 1297.0
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "reasoning_effort": "medium",
+        "requests": 127,
+        "avg_duration_ms": 5829.0,
+        "avg_ttft_ms": 3742.0,
+        "max_duration_ms": 30307,
+        "total_seconds": 740.0
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "(none)",
+        "requests": 76,
+        "avg_duration_ms": 6684.0,
+        "avg_ttft_ms": 5031.0,
+        "max_duration_ms": 22719,
+        "total_seconds": 508.0
+      },
+      {
+        "model": "gpt-5.5",
+        "reasoning_effort": "high",
+        "requests": 50,
+        "avg_duration_ms": 9438.0,
+        "avg_ttft_ms": 6662.0,
+        "max_duration_ms": 32529,
+        "total_seconds": 472.0
+      },
+      {
+        "model": "claude-sonnet-5",
+        "reasoning_effort": "medium",
+        "requests": 37,
+        "avg_duration_ms": 9038.0,
+        "avg_ttft_ms": 2750.0,
+        "max_duration_ms": 85282,
+        "total_seconds": 334.0
+      },
+      {
+        "model": "claude-sonnet-5",
+        "reasoning_effort": "xhigh",
+        "requests": 18,
+        "avg_duration_ms": 16773.0,
+        "avg_ttft_ms": 5385.0,
+        "max_duration_ms": 82229,
+        "total_seconds": 302.0
+      },
+      {
+        "model": "gpt-5.5",
+        "reasoning_effort": "xhigh",
+        "requests": 28,
+        "avg_duration_ms": 8210.0,
+        "avg_ttft_ms": 4524.0,
+        "max_duration_ms": 29660,
+        "total_seconds": 230.0
+      },
+      {
+        "model": "claude-haiku-4.5",
+        "reasoning_effort": "(none)",
+        "requests": 31,
+        "avg_duration_ms": 5744.0,
+        "avg_ttft_ms": 1537.0,
+        "max_duration_ms": 34040,
+        "total_seconds": 178.0
+      },
+      {
+        "model": "claude-sonnet-4.6",
+        "reasoning_effort": "medium",
+        "requests": 18,
+        "avg_duration_ms": 5200.0,
+        "avg_ttft_ms": 3373.0,
+        "max_duration_ms": 10522,
+        "total_seconds": 94.0
+      },
+      {
+        "model": "gpt-5.6-luna",
+        "reasoning_effort": "(none)",
+        "requests": 13,
+        "avg_duration_ms": 7178.0,
+        "avg_ttft_ms": 3347.0,
+        "max_duration_ms": 20119,
+        "total_seconds": 93.0
+      },
+      {
+        "model": "gpt-5.4",
+        "reasoning_effort": "high",
+        "requests": 14,
+        "avg_duration_ms": 5707.0,
+        "avg_ttft_ms": 4959.0,
+        "max_duration_ms": 8569,
+        "total_seconds": 80.0
+      },
+      {
+        "model": "gpt-5.6-sol-fast",
+        "reasoning_effort": "low",
+        "requests": 10,
+        "avg_duration_ms": 5110.0,
+        "avg_ttft_ms": 2985.0,
+        "max_duration_ms": 8440,
+        "total_seconds": 51.0
+      }
+    ],
+    "06-main-vs-subagent": [
+      {
+        "lane": "main",
+        "requests": 6988,
+        "sessions": 141,
+        "aiu": 135995.16,
+        "aiu_per_request": 19.46,
+        "avg_duration_ms": 12342.0
+      },
+      {
+        "lane": "subagent",
+        "requests": 993,
+        "sessions": 15,
+        "aiu": 13849.24,
+        "aiu_per_request": 13.95,
+        "avg_duration_ms": 13154.0
+      }
+    ]
+  }
+}
