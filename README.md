@@ -18,6 +18,12 @@ writer — it is a **fast, calibrated scorer** that returns typed answers (`noul
 `choice`) in a few hundred milliseconds. Putting Jev in front of Copilot's costly decisions makes
 it leaner without making it dumber. **Copilot still writes; Jev gates, ranks, and routes.**
 
+The gates are not advice. Copilot CLI has a **hook API** that can deny a tool call before it
+runs, so this repo ships a plugin that enforces the gates at the point of action rather than a
+policy document the agent may choose to read. See
+[`docs/copilot-hook-api.md`](docs/copilot-hook-api.md) for the hook contract and its sharp edges
+— one of which caused a real fail-open bug in this repo.
+
 ## Why measured, not asserted
 
 The baseline was mined from real Copilot CLI usage on one developer's machine (30-day window).
@@ -25,10 +31,11 @@ Highlights:
 
 | Finding | Number | Implication |
 | --- | --- | --- |
-| Autonomous turns per user turn | **13.5** (6,375 agent vs 473 user requests) | Most spend is the agent talking to itself — gate the loop |
-| Single model/effort pair | `claude-opus-5 @ high` = **50.4%** of AI units | Model + effort routing is the biggest single $ lever |
-| Most expensive per request | `gpt-6-astra @ xhigh` = **42.7 AIU/req** (2.2× opus-5 high) | Escalation needs justification |
-| Spend concentration | Top session = **28.4%** of all spend; top 12 = **77.6%** | Runaway sessions dominate — stop gates matter |
+| Autonomous turns per user turn | **13.5** (6,398 agent vs 473 user requests) | Most spend is the agent talking to itself — gate the loop |
+| Single model/effort pair | `claude-opus-5 @ high` = **50.3%** of AI units | Model + effort routing is the biggest single $ lever |
+| Most expensive per request | `gpt-6-astra @ xhigh` = **42.67 AIU/req** (2.2× opus-5 high) | Escalation needs justification |
+| Spend concentration | Top session = **24.8%** of all spend; top 15 = **77.9%** | Runaway sessions dominate — stop gates matter |
+| Input:output token ratio | **260.8:1** | Cost is the context you accumulate, not what you generate |
 | `bash` doing built-in tools' job | **40.3%** of bash calls are search/read/list | Read amplification |
 | Duplicate identical calls | **253+** repeat calls with identical arguments | Straightforward redundancy waste |
 | Browser automation reliability | `browser_click` **78.6%** failure, `browser_navigate` **59.6%** | Retry loops burn turns |
@@ -39,14 +46,26 @@ Full method and the complete report: [`telemetry/`](telemetry/).
 ## Layout
 
 ```
-docs/        ranked use-case research, exec brief, wiring, and the write-up
+docs/        ranked use-case research, exec brief, the hook API reference, and the write-up
 telemetry/   session-store queries, the miner, and redacted baseline reports
-gates/       the runnable Jev gate library (one directory per gate)
-harness/     Copilot CLI skill + ordered gate pipeline for a turn
-experiments/ trap suite and proof artifacts
-ci-loop/     decision log, proposals, baselines — calibration over time
-tests/       offline tests, including the redaction test
+gates/       the runnable Jev gate library — 15 gates, one directory each (see gates/INDEX.md)
+harness/     the Copilot CLI plugin: hooks that route a tool call to the right gate
+experiments/ trap suite — adversarial scenarios each gate must catch
+ci-loop/     automatic decision logging, scoring, and baselines — calibration over time
+tests/       offline tests, including redaction, routing, semantics and repo hygiene
 ```
+
+## The 15 gates
+
+| Lever | Gates |
+| --- | --- |
+| **Safety** | `destructive-action`, `secret-exposure`, `external-write` |
+| **Cost** | `model-effort-route`, `tool-worth-it`, `redundant-tool-call`, `subagent-spawn`, `context-read-budget` |
+| **Performance** | `stop-vs-continue`, `retry-worth-it`, `parallel-fanout` |
+| **Quality** | `plan-vs-act`, `skill-selection`, `verification-sufficient`, `response-quality` |
+
+Thresholds, fail modes and Jev question maps: [`gates/INDEX.md`](gates/INDEX.md), generated from
+the configs so it cannot drift. Ranking and evidence: [`docs/cool-use-cases.md`](docs/cool-use-cases.md).
 
 ## Running it without an API key
 
@@ -68,9 +87,24 @@ cd gates/<slug> && python3 gate.py
 # Live
 export TYPESAFE_API_KEY=...        # never commit this
 cd gates/<slug> && JEV_MODE=live python3 gate.py
+
+# The whole thing, offline
+JEV_MODE=fixture python3 -m unittest discover -s tests   # 73 tests
+python3 -B experiments/traps/run_traps.py                # 9 adversarial traps
 ```
 
 Python 3.13, standard library only. No dependencies to install.
+
+## Installing the gates into Copilot CLI
+
+The harness is a Copilot CLI plugin. Its `hooks.json` registers `preToolUse`,
+`postToolUseFailure`, `agentStop` and `sessionStart`; the `preToolUse` hook is the one that can
+actually stop a tool call. Hard rules (read-only integrations, retry caps, dirty-tree spawns)
+resolve locally before Jev is consulted at all — which is both faster and, because hook
+**timeouts fail open**, the only way to make a safety rule survive a slow network.
+
+Decision logging is **off by default**; set `COPILOT_JEV_LOG_DECISIONS=1` to record what the
+gates decided into `ci-loop/logs/` (gitignored — see Privacy).
 
 ## Secrets
 
@@ -88,8 +122,15 @@ policy — see [`telemetry/README.md`](telemetry/README.md).
 
 ## Status
 
-Early. The gate library and the ranked research are the current focus. Live-Jev proof runs are
-pending an API key.
+The ranked research, the 15-gate library, the enforcing plugin, the trap suite and the
+improvement loop are built and pass offline: **73 tests, 15 gates, 9 traps**.
+
+What is **not** proven: no gate has run against live Jev, because `TYPESAFE_API_KEY` was
+unavailable — every result here is `fixture` or `policy`, and is labelled as such. Thresholds are
+reasoned from telemetry rather than validated against outcomes. Aggregate gate latency is
+unmeasured, and is the main risk to the whole approach being net-positive.
+[`docs/HOW-JEV-IMPROVES-COPILOT.md`](docs/HOW-JEV-IMPROVES-COPILOT.md) keeps a running list of
+what would have to be measured to call any of this proven.
 
 ## Provenance
 
