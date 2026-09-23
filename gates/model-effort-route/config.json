@@ -1,0 +1,43 @@
+{
+  "slug": "model-effort-route",
+  "name": "Model Effort Route Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "keep_current_tier",
+    "proceed": true
+  },
+  "thresholds": {
+    "needs_frontier_model_downgrade_max": 0.45,
+    "downgrade_reasoning_depth_max": "shallow",
+    "needs_frontier_model_escalate_min": 0.8,
+    "escalate_reasoning_depth_min": "deep"
+  },
+  "questions": {
+    "needs_frontier_model": {
+      "type": "noul",
+      "instructions": "Given this Copilot CLI turn state, estimate the calibrated belief that a cheaper model or reasoning-effort tier would produce a materially worse result for the user's current request."
+    },
+    "reasoning_depth": {
+      "type": "score",
+      "instructions": "Score the reasoning depth genuinely needed to complete this turn correctly, from routine mechanical work to exhaustive reasoning.",
+      "criteria": [
+        "trivial",
+        "shallow",
+        "moderate",
+        "deep",
+        "exhaustive"
+      ]
+    },
+    "recommended_tier": {
+      "type": "choice",
+      "instructions": "Choose the lowest model and reasoning-effort tier that should still satisfy this turn, considering task kind, blast radius, context size, and prior failures.",
+      "criteria": {
+        "cheap_fast": "Use the cheapest fast tier for mechanical reads, simple questions, or low-risk single-step work.",
+        "mid": "Use a mid tier for ordinary edits, bounded debugging, or moderate synthesis.",
+        "frontier_medium": "Use a frontier model at medium effort for harder multi-file work where quality matters but exhaustive reasoning is not needed.",
+        "frontier_high": "Use a frontier model at high effort for deep debugging, cross-cutting refactors, or high-stakes correctness.",
+        "frontier_xhigh": "Use the most expensive frontier tier for unusually complex, ambiguous, or exhaustive work."
+      }
+    }
+  }
+}

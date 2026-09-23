@@ -1,0 +1,36 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "safe_to_execute": {
+      "type": "noul",
+      "noul": 0.42
+    },
+    "blast_radius": {
+      "type": "score",
+      "score": 3,
+      "confidence": 0.78,
+      "legend": "costly",
+      "probabilities": {
+        "none": 0.02,
+        "scratch_only": 0.08,
+        "recoverable": 0.2,
+        "costly": 0.55,
+        "catastrophic": 0.15
+      }
+    },
+    "safer_alternative": {
+      "type": "choice",
+      "choice": "commit_first",
+      "confidence": 0.81,
+      "probabilities": {
+        "none_needed": 0.02,
+        "narrow_scope": 0.22,
+        "commit_first": 0.54,
+        "dry_run_first": 0.16,
+        "ask_user": 0.06
+      }
+    }
+  }
+}

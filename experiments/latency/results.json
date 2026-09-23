@@ -1,0 +1,354 @@
+{
+  "generated_at": "2026-09-23T19:16:41.359682+10:00",
+  "command": "env -u TYPESAFE_API_KEY JEV_MODE=fixture python3 experiments/latency/bench.py",
+  "environment": {
+    "python": "3.13.13",
+    "executable": "/opt/homebrew/opt/python@3.13/bin/python3.13",
+    "platform": "macOS-27.0-arm64-i386-64bit-Mach-O",
+    "cwd": "<repo>",
+    "jev_mode": "fixture",
+    "typesafe_api_key_present": false
+  },
+  "benchmark_metadata": {
+    "payloads": {
+      "cheap": {
+        "toolName": "edit",
+        "toolArgs": {
+          "path": "a.py"
+        },
+        "cwd": "<repo>"
+      },
+      "policy": {
+        "toolName": "slack-SendMessageToChannel",
+        "toolArgs": {
+          "text": "hi"
+        },
+        "cwd": "<repo>"
+      },
+      "fixture": {
+        "toolName": "bash",
+        "toolArgs": {
+          "command": "npm test"
+        },
+        "cwd": "<repo>"
+      },
+      "large_view": {
+        "toolName": "view",
+        "toolArgs": {
+          "path": "<repo>/experiments/latency/data/large_read_fixture.txt"
+        },
+        "cwd": "<repo>"
+      },
+      "post_failure": {
+        "toolName": "playwright-browser_click",
+        "error": "element not found",
+        "cwd": "<repo>"
+      }
+    },
+    "fixtures": {
+      "large_read_file": "experiments/latency/data/large_read_fixture.txt",
+      "small_read_file": "experiments/latency/data/small_read_fixture.txt"
+    },
+    "harness_sets": {
+      "cheap_tools": [
+        "create",
+        "edit",
+        "glob",
+        "grep",
+        "str_replace",
+        "view"
+      ],
+      "expensive_tools": [
+        "bash",
+        "run_factory",
+        "task",
+        "web_fetch",
+        "web_search"
+      ]
+    }
+  },
+  "measurements": [
+    {
+      "name": "subprocess_python_plus_pre_tool_import",
+      "kind": "subprocess",
+      "iterations": 80,
+      "median_ms": 43.2682,
+      "p95_ms": 45.1382,
+      "mean_ms": 43.2901,
+      "min_ms": 40.6138,
+      "max_ms": 48.1187,
+      "notes": "Fresh interpreter plus executing pre_tool_use.py top-level imports; no payload processing."
+    },
+    {
+      "name": "route_pre_tool_use_not_gated_edit",
+      "kind": "in_process",
+      "iterations": 20000,
+      "median_ms": 0.0005,
+      "p95_ms": 0.0005,
+      "mean_ms": 0.0005,
+      "min_ms": 0.0004,
+      "max_ms": 0.0063,
+      "notes": "Direct harness.route_pre_tool_use() None path for a cheap tool."
+    },
+    {
+      "name": "violates_read_only_policy_check",
+      "kind": "in_process",
+      "iterations": 20000,
+      "median_ms": 0.002,
+      "p95_ms": 0.0021,
+      "mean_ms": 0.002,
+      "min_ms": 0.0018,
+      "max_ms": 0.0066,
+      "notes": "Pure local read-only policy predicate used before any Jev call."
+    },
+    {
+      "name": "external_write_decide_source_policy",
+      "kind": "in_process",
+      "iterations": 5000,
+      "median_ms": 0.0977,
+      "p95_ms": 0.1113,
+      "mean_ms": 0.0999,
+      "min_ms": 0.0953,
+      "max_ms": 0.2498,
+      "notes": "Full gate-local hard-rule decision; source=policy and zero network."
+    },
+    {
+      "name": "tool_worth_it_full_gate_source_fixture",
+      "kind": "in_process",
+      "iterations": 2000,
+      "median_ms": 0.2694,
+      "p95_ms": 0.315,
+      "mean_ms": 0.2823,
+      "min_ms": 0.2555,
+      "max_ms": 1.5782,
+      "notes": "Dynamic gate load + config load + fixture replay + evaluate(); no subprocess."
+    },
+    {
+      "name": "unbounded_large_read_large_file",
+      "kind": "in_process",
+      "iterations": 10000,
+      "median_ms": 0.0607,
+      "p95_ms": 0.0699,
+      "mean_ms": 0.0622,
+      "min_ms": 0.0596,
+      "max_ms": 0.0871,
+      "notes": "Local file-size prefilter on a 1000-line file; implementation counts to 601 lines."
+    },
+    {
+      "name": "unbounded_large_read_small_file",
+      "kind": "in_process",
+      "iterations": 10000,
+      "median_ms": 0.0426,
+      "p95_ms": 0.0526,
+      "mean_ms": 0.043,
+      "min_ms": 0.0379,
+      "max_ms": 0.243,
+      "notes": "Same prefilter on a small file that should not be gated."
+    },
+    {
+      "name": "hook_e2e_cheap_tool_allow",
+      "kind": "hook_e2e",
+      "iterations": 80,
+      "median_ms": 40.3046,
+      "p95_ms": 48.0405,
+      "mean_ms": 40.6384,
+      "min_ms": 36.5783,
+      "max_ms": 53.5057,
+      "notes": "Actual preToolUse subprocess with JSON stdin; cheap tool returns allow without a gate."
+    },
+    {
+      "name": "hook_e2e_readonly_policy_deny",
+      "kind": "hook_e2e",
+      "iterations": 80,
+      "median_ms": 40.3611,
+      "p95_ms": 45.1667,
+      "mean_ms": 40.9957,
+      "min_ms": 36.6843,
+      "max_ms": 60.3331,
+      "notes": "Actual preToolUse subprocess; read-only write violation denied locally before Jev."
+    },
+    {
+      "name": "hook_e2e_fixture_gate_bash",
+      "kind": "hook_e2e",
+      "iterations": 80,
+      "median_ms": 86.1792,
+      "p95_ms": 89.0734,
+      "mean_ms": 86.2997,
+      "min_ms": 80.7946,
+      "max_ms": 97.963,
+      "notes": "Actual preToolUse subprocess; bash routes to tool-worth-it with source=fixture."
+    },
+    {
+      "name": "hook_e2e_large_view_fixture_gate",
+      "kind": "hook_e2e",
+      "iterations": 50,
+      "median_ms": 87.7606,
+      "p95_ms": 90.0955,
+      "mean_ms": 87.4447,
+      "min_ms": 83.0252,
+      "max_ms": 91.4035,
+      "notes": "Actual preToolUse subprocess; large unbounded view routes to context-read-budget fixture."
+    },
+    {
+      "name": "post_failure_retry_fixture_gate",
+      "kind": "hook_e2e",
+      "iterations": 80,
+      "median_ms": 87.3866,
+      "p95_ms": 90.5141,
+      "mean_ms": 87.2616,
+      "min_ms": 81.2916,
+      "max_ms": 97.9586,
+      "notes": "Actual postToolUseFailure subprocess; browser click failure routes to retry-worth-it fixture."
+    }
+  ],
+  "session_model": {
+    "telemetry_source": {
+      "baseline_json": "telemetry/reports/baseline-2026-09-23.json",
+      "cloud_query_rows": "telemetry/queries/07-tool-mix.sql, 08-redundant-tool-calls.sql, 09-bash-intent-split.sql reproduced with session_store_sql on 2026-09-23",
+      "tool_sessions": 59,
+      "total_tool_calls": 3970,
+      "baseline_window": "-30 days",
+      "baseline_as_of": "2026-09-23 18:14 AEST"
+    },
+    "routing_counts": {
+      "current_hooks_json_pretool_matched_calls": 2168,
+      "fixture_pretool_calls": 2168,
+      "policy_pretool_calls": 0,
+      "unmatched_tool_calls": 1802,
+      "post_failure_hook_calls": 103,
+      "pretool_matcher": "bash|task|run_factory|web_fetch|web_search|create_pull_request|update_pull_request|create_issue|add_pr_review_comment|reply_to_comment|reply_and_resolve_review_thread|send_session_message|create_issue_artifact|slack-.*|workiq-.*|atlassian-.*|cc-828GDeeqlf0t1i29-.*|cc-pdqHAftw9cy3d8Vw-.*|cc-qoxxvytaDqWyRth7-.*",
+      "pretool_matched_by_tool": {
+        "bash": 2060,
+        "web_fetch": 41,
+        "send_session_message": 31,
+        "task": 10,
+        "web_search": 10,
+        "reply_and_resolve_review_thread": 7,
+        "create_pull_request": 4,
+        "reply_to_comment": 3,
+        "slack-slack_search_public": 1,
+        "workiq-fetch": 1
+      },
+      "failure_hook_candidates": {
+        "playwright-browser_navigate": 31,
+        "playwright-browser_click": 22,
+        "kusto-explorer-kusto_query_readonly": 20,
+        "open_canvas": 11,
+        "bash": 6,
+        "kusto-explorer-kusto_mgmt_show": 5,
+        "playwright-browser_type": 3,
+        "web_fetch": 2,
+        "playwright-browser_snapshot": 1,
+        "kusto-explorer-kusto_principal_roles": 1,
+        "playwright-browser_take_screenshot": 1
+      }
+    },
+    "overhead_seconds_30d": {
+      "current_hooks_json_pretool": 186.84,
+      "current_post_tool_use_failure": 9.0,
+      "current_total": 195.84,
+      "current_total_per_session": 3.32,
+      "hypothetical_if_pretool_hook_matched_all_tools": 268.47,
+      "hypothetical_all_tools_per_session": 4.55
+    },
+    "plausible_savings_seconds_30d": {
+      "duplicate_bash_only": 701.24,
+      "duplicate_known_latency_tools": 1618.5,
+      "duplicate_known_latency_calls": 210,
+      "bash_readish_replaced_by_builtin_upper_bound": 7021.95,
+      "duplicate_browser_click_only": 15.05,
+      "all_failed_browser_clicks_if_changed_strategy_avoided_retry": 82.76,
+      "one_task_call": 174.36,
+      "one_web_search_call": 38.96
+    },
+    "break_even_current_overhead": {
+      "duplicate_bash_calls_needed": 22,
+      "duplicate_bash_calls_available": 77,
+      "task_calls_needed": 2,
+      "web_search_calls_needed": 6,
+      "browser_click_retries_needed": 53,
+      "browser_click_wasted_repeats_available": 4
+    },
+    "break_even_per_invocation": [
+      {
+        "saved_tool": "edit",
+        "avg_saved_ms": 256,
+        "fixture_gate_must_be_right_pct": 33.66,
+        "live_400ms_gate_must_be_right_pct": 171.99
+      },
+      {
+        "saved_tool": "view",
+        "avg_saved_ms": 908,
+        "fixture_gate_must_be_right_pct": 9.49,
+        "live_400ms_gate_must_be_right_pct": 48.49
+      },
+      {
+        "saved_tool": "web_fetch",
+        "avg_saved_ms": 1864,
+        "fixture_gate_must_be_right_pct": 4.62,
+        "live_400ms_gate_must_be_right_pct": 23.62
+      },
+      {
+        "saved_tool": "bash",
+        "avg_saved_ms": 9107,
+        "fixture_gate_must_be_right_pct": 0.95,
+        "live_400ms_gate_must_be_right_pct": 4.83
+      },
+      {
+        "saved_tool": "web_search",
+        "avg_saved_ms": 38961,
+        "fixture_gate_must_be_right_pct": 0.22,
+        "live_400ms_gate_must_be_right_pct": 1.13
+      },
+      {
+        "saved_tool": "task",
+        "avg_saved_ms": 174362,
+        "fixture_gate_must_be_right_pct": 0.05,
+        "live_400ms_gate_must_be_right_pct": 0.25
+      },
+      {
+        "saved_tool": "playwright-browser_click",
+        "avg_saved_ms": 3762,
+        "fixture_gate_must_be_right_pct": 2.32,
+        "live_400ms_gate_must_be_right_pct": 11.7
+      }
+    ],
+    "bash_intent": {
+      "search_via_bash": 747,
+      "run_code_or_tests": 474,
+      "other": 382,
+      "git": 203,
+      "gh_cli": 125,
+      "network_or_cloud": 121,
+      "list_via_bash": 44,
+      "read_file_via_bash": 40
+    },
+    "redundant_calls": {
+      "bash": 77,
+      "view": 46,
+      "playwright-browser_snapshot": 26,
+      "create": 13,
+      "edit": 12,
+      "report_progress": 11,
+      "github-mcp-server-get_file_contents": 8,
+      "playwright-browser_navigate": 7,
+      "skill": 6,
+      "invoke_canvas_action": 6,
+      "read_bash": 6,
+      "runtime-tools-secret_scanning": 5,
+      "github-mcp-server-actions_list": 4,
+      "github-mcp-server-search_code": 4,
+      "playwright-browser_click": 4,
+      "rg": 4,
+      "codeql_checker": 4,
+      "web_fetch": 4,
+      "runtime-tools-store_memory": 3,
+      "web_search": 3,
+      "computer-use-click": 2,
+      "glob": 2,
+      "apply_patch": 2,
+      "grep": 2,
+      "github-mcp-server-list_pull_requests": 1
+    }
+  }
+}

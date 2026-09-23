@@ -1,0 +1,38 @@
+{
+  "slug": "skill-selection",
+  "name": "Skill Selection Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "skip_skill",
+    "proceed": false
+  },
+  "thresholds": {
+    "skill_needed_min": 0.6,
+    "match_strength_min": "partial",
+    "max_candidates": 8
+  },
+  "questions": {
+    "skill_needed": {
+      "type": "noul",
+      "instructions": "Given the user request, task domain, candidate skill shortlist, and skill context cost: would loading a skill materially improve the outcome enough to justify its context cost?"
+    },
+    "best_skill": {
+      "type": "choice",
+      "instructions": "Which shortlisted skill is the best fit to load now, or choose none if no skill should be loaded?",
+      "criteria": {
+        "none": "No skill should be loaded for this task"
+      }
+    },
+    "match_strength": {
+      "type": "score",
+      "instructions": "How strong is the best candidate skill's fit for this task?",
+      "criteria": [
+        "none",
+        "weak",
+        "partial",
+        "strong",
+        "exact"
+      ]
+    }
+  }
+}

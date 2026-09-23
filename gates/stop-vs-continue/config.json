@@ -1,0 +1,41 @@
+{
+  "slug": "stop-vs-continue",
+  "name": "Stop vs Continue Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "continue",
+    "proceed": true
+  },
+  "thresholds": {
+    "should_stop_min": 0.6,
+    "marginal_value_continue_min": "modest"
+  },
+  "questions": {
+    "should_stop": {
+      "type": "noul",
+      "instructions": "Given the original user goal, progress, open questions, steps taken, and latest yield, estimate the calibrated belief that continuing the current line of work adds little value."
+    },
+    "marginal_value": {
+      "type": "score",
+      "instructions": "Score the expected marginal value of one more autonomous step toward the user's goal.",
+      "criteria": [
+        "none",
+        "trivial",
+        "modest",
+        "substantial",
+        "critical"
+      ]
+    },
+    "stop_reason": {
+      "type": "choice",
+      "instructions": "Choose the best explanation for whether the agent should stop, re-plan, ask the user, or keep going.",
+      "criteria": {
+        "goal_met": "The user's goal is already satisfied enough to answer.",
+        "diminishing_returns": "Further autonomous steps are unlikely to add material value.",
+        "blocked_needs_user": "The next decision requires user input or permission.",
+        "wrong_approach": "The current approach is not working; stop this line and re-plan explicitly.",
+        "keep_going": "Continuing is still useful and aligned with the goal."
+      }
+    }
+  }
+}

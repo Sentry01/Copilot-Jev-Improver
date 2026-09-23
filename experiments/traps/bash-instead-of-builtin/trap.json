@@ -1,0 +1,39 @@
+{
+  "slug": "bash-instead-of-builtin",
+  "title": "Bash instead of a built-in",
+  "gate": "tool-worth-it",
+  "state": {
+    "user_goal": "Find every TODO marker under src/ before editing one file.",
+    "already_have": "Copilot CLI has purpose-built grep/glob/view tools with bounded output for exactly this search/read/list work.",
+    "proposed_tool": "bash: grep -R \"TODO\" src && find src -type f && cat src/components/Button.tsx",
+    "est_cost_tier": "medium",
+    "est_latency_ms": 9100
+  },
+  "expected_action": "skip_tool",
+  "expected_proceed": false,
+  "expected_source": "fixture",
+  "falsifier": "If the requested operation requires shell semantics the built-ins cannot express, or built-ins return incomplete data while bash succeeds, the gate is over-blocking.",
+  "requires_policy_short_circuit": false,
+  "fixture_honesty": "These answers are an offline fixture, not live Jev evidence.",
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "tool_worth_it": {
+      "type": "noul",
+      "noul": 0.21
+    },
+    "primary_blocker": {
+      "type": "choice",
+      "choice": "wrong_tool",
+      "confidence": 0.84,
+      "probabilities": {
+        "already_answered": 0.1,
+        "wrong_tool": 0.74,
+        "low_signal": 0.08,
+        "user_not_needed": 0.03,
+        "none": 0.05
+      }
+    }
+  }
+}

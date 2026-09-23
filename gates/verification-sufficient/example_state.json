@@ -1,0 +1,7 @@
+{
+  "claimed_outcome": "The JSON config loader now rejects malformed gate configuration before evaluation starts.",
+  "changes_made": "Added validation for missing question type fields and updated the loader path that reports invalid gate configuration.",
+  "verification_performed": "Ran python3 -m pytest tests/test_gate_config.py::test_invalid_question_type_is_rejected; exit 0 with 1 passed.",
+  "test_coverage": "The targeted test exercises the new validation branch and confirms the error is surfaced before any gate decision is made.",
+  "reversibility": "trivial"
+}

@@ -1,0 +1,23 @@
+{
+  "user_request": "Before claiming this code change is done, verify the CLI path and importable path both work in fixture mode.",
+  "candidate_skills": [
+    {
+      "name": "verification-before-completion",
+      "description": "Requires fresh verification evidence before making completion claims."
+    },
+    {
+      "name": "test-driven-development",
+      "description": "Guides red-green implementation for behavior changes."
+    },
+    {
+      "name": "systematic-debugging",
+      "description": "Structured root-cause workflow for failures."
+    },
+    {
+      "name": "copywriting",
+      "description": "Improves business prose and messaging."
+    }
+  ],
+  "task_domain": "code_edit",
+  "skill_context_cost": "small"
+}

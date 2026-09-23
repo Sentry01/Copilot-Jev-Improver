@@ -1,0 +1,8 @@
+{
+  "task_description": "Check whether one gate's config threshold matches its SPEC section.",
+  "context_transfer_size": "Small: the parent already has the relevant SPEC and config open.",
+  "parent_can_do_inline": "Yes, this is a single direct comparison.",
+  "parallelism_benefit": "None; there is no independent work to overlap.",
+  "spawn_kind": "subagent",
+  "writes_to_shared_tree": false
+}

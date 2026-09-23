@@ -1,0 +1,17 @@
+{
+  "name": "copilot-jev-gates",
+  "version": "0.1.0",
+  "description": "Gates Copilot CLI tool calls through Jev (TypeSafe System One) for cost, quality, safety and performance. Ranked against measured session telemetry.",
+  "license": "MIT",
+  "homepage": "https://github.com/Sentry01/Copilot-Jev-Improver",
+  "repository": "https://github.com/Sentry01/Copilot-Jev-Improver",
+  "keywords": [
+    "copilot-cli",
+    "hooks",
+    "jev",
+    "typesafe",
+    "agent-ops",
+    "cost-control",
+    "safety"
+  ]
+}

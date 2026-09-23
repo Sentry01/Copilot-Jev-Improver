@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "name": "dry_plan_vs_act",
+    "slug": "plan-vs-act",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 0.0,
+    "error": null,
+    "as_of": "2026-09-23 19:18:05 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "user_request": "Add retry handling to the local webhook sender and update the tests for transient HTTP failures.",
+      "estimated_steps": 5,
+      "files_likely_touched": 3,
+      "ambiguity": "The desired retry count and backoff style are not specified, but the existing sender has a clear error-handling pattern.",
+      "reversibility": "moderate",
+      "user_specified_mode": "unspecified"
+    },
+    "questions": {
+      "needs_plan": {
+        "type": "noul",
+        "instructions": "Given the user request, estimated steps, number of files likely touched, ambiguity, reversibility, and any user-specified mode: would making a plan before acting materially improve the outcome?"
+      },
+      "ambiguity_level": {
+        "type": "score",
+        "instructions": "How much genuine ambiguity remains before safely choosing the next workflow mode?",
+        "criteria": [
+          "none",
+          "minor",
+          "moderate",
+          "high",
+          "blocking"
+        ]
+      },
+      "recommended_mode": {
+        "type": "choice",
+        "instructions": "Which workflow mode should be used next if the user did not explicitly override it?",
+        "criteria": {
+          "act_now": "Proceed directly with the implementation or answer",
+          "quick_outline": "Give a brief outline before acting",
+          "full_plan": "Create a structured plan before acting",
+          "ask_clarifying_first": "Ask a clarifying question before planning or acting"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-latest",
+    "answers": {
+      "needs_plan": {
+        "type": "noul",
+        "noul": 0.72
+      },
+      "ambiguity_level": {
+        "type": "score",
+        "score": "high",
+        "confidence": 0.74,
+        "legend": [
+          "none",
+          "minor",
+          "moderate",
+          "high",
+          "blocking"
+        ],
+        "probabilities": {
+          "none": 0.02,
+          "minor": 0.06,
+          "moderate": 0.15,
+          "high": 0.74,
+          "blocking": 0.03
+        }
+      },
+      "recommended_mode": {
+        "type": "choice",
+        "choice": "full_plan",
+        "confidence": 0.69,
+        "probabilities": {
+          "act_now": 0.05,
+          "quick_outline": 0.19,
+          "full_plan": 0.69,
+          "ask_clarifying_first": 0.07
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "full_plan",
+    "proceed": false,
+    "reason": "full_plan: needs_plan=0.72 (min 0.6) and ambiguity_level=high (plan at high); recommended_mode=full_plan",
+    "needs_plan": 0.72,
+    "ambiguity_level": "high",
+    "ambiguity_level_index": 3,
+    "recommended_mode": "full_plan",
+    "override_applied": false,
+    "thresholds": {
+      "needs_plan_min": 0.6,
+      "ambiguity_plan_min": "high",
+      "ambiguity_plan_min_index": 3,
+      "ambiguity_blocking": "blocking",
+      "ambiguity_blocking_index": 4
+    }
+  }
+}

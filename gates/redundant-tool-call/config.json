@@ -1,0 +1,28 @@
+{
+  "slug": "redundant-tool-call",
+  "name": "Redundant Tool Call Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "call_tool",
+    "proceed": true
+  },
+  "thresholds": {
+    "is_redundant_min": 0.65
+  },
+  "questions": {
+    "is_redundant": {
+      "type": "noul",
+      "instructions": "Given the proposed call, comparable prior calls this session, elapsed time, and volatility of the underlying data, estimate the calibrated belief that the agent already has the answer and the call is redundant."
+    },
+    "reuse_strategy": {
+      "type": "choice",
+      "instructions": "Choose how to handle the proposed repeat call while accounting for staleness and volatility.",
+      "criteria": {
+        "reuse_cache": "Reuse the prior result already in context.",
+        "narrow_scope": "Do not repeat the broad call; make a narrower call only if needed.",
+        "call_anyway_stale": "Call again because the prior result may be stale.",
+        "call_anyway_new": "Call because this is effectively new information despite similar arguments."
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "slug": "opus-on-trivial-turn",
+  "title": "Opus on a trivial turn",
+  "gate": "model-effort-route",
+  "state": {
+    "user_request": "Change the button label from Save to Done in one JSX file.",
+    "turn_kind": "edit",
+    "blast_radius": "single_file",
+    "context_size_tier": "small",
+    "prior_attempts": 0,
+    "current_tier": "frontier_high"
+  },
+  "expected_action": "downgrade",
+  "expected_proceed": true,
+  "expected_source": "fixture",
+  "falsifier": "If live Jev scores a trivial single-file label edit as deep/frontier-needed, or the cheaper tier causes a failed edit that requires retrying on the expensive tier, this trap is not helping.",
+  "requires_policy_short_circuit": false,
+  "fixture_honesty": "These answers are an offline fixture, not live Jev evidence.",
+  "model": "jev-fixture",
+  "latency_ms": 0.0,
+  "usage": {},
+  "answers": {
+    "needs_frontier_model": {
+      "type": "noul",
+      "noul": 0.08
+    },
+    "reasoning_depth": {
+      "type": "score",
+      "score": "trivial",
+      "confidence": 0.91,
+      "probabilities": {
+        "trivial": 0.91,
+        "shallow": 0.07,
+        "moderate": 0.02,
+        "deep": 0.0,
+        "exhaustive": 0.0
+      }
+    },
+    "recommended_tier": {
+      "type": "choice",
+      "choice": "cheap_fast",
+      "confidence": 0.86,
+      "probabilities": {
+        "cheap_fast": 0.86,
+        "mid": 0.1,
+        "frontier_medium": 0.03,
+        "frontier_high": 0.01,
+        "frontier_xhigh": 0.0
+      }
+    }
+  }
+}

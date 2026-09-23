@@ -1,0 +1,7 @@
+{
+  "proposed_command": "git clean -fd gates/destructive-action/.verify",
+  "working_tree_state": "Untracked gate directories and documentation edits are present from parallel agents.",
+  "scope": "The command can remove untracked files below a gate verification directory if the path is wrong or expanded too broadly.",
+  "recoverable": "from_git",
+  "user_asked_for_it": false
+}

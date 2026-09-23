@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "name": "dry_subagent_spawn",
+    "slug": "subagent-spawn",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 0.0,
+    "error": null,
+    "as_of": "2026-09-23 19:18:06 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "task_description": "Check whether one gate's config threshold matches its SPEC section.",
+      "context_transfer_size": "Small: the parent already has the relevant SPEC and config open.",
+      "parent_can_do_inline": "Yes, this is a single direct comparison.",
+      "parallelism_benefit": "None; there is no independent work to overlap.",
+      "spawn_kind": "subagent",
+      "writes_to_shared_tree": false
+    },
+    "questions": {
+      "spawn_justified": {
+        "type": "noul",
+        "instructions": "Given the task, context transfer size, whether the parent can do it inline, the parallelism benefit, spawn kind, and shared-tree write risk, estimate the calibrated probability that delegation beats doing the work inline."
+      },
+      "spawn_reason": {
+        "type": "choice",
+        "instructions": "Choose the main reason delegation is or is not justified.",
+        "criteria": {
+          "context_isolation": "A separate context window materially improves focus or avoids context overflow.",
+          "true_parallelism": "The delegated work is genuinely independent and can run in parallel.",
+          "specialised_skill": "The child has a specialized skill or tool access that the parent should use.",
+          "underspecified": "The delegation prompt would be too vague or incomplete.",
+          "should_inline": "The parent should handle this inline without spawning another agent."
+        }
+      },
+      "expected_multiplier": {
+        "type": "score",
+        "instructions": "Estimate the total execution multiplier introduced by delegation. Use the ordered criteria from least to most expensive.",
+        "criteria": [
+          "1x",
+          "2x",
+          "5x",
+          "10x",
+          "20x_plus"
+        ]
+      }
+    }
+  },
+  "response": {
+    "model": "jev-fixture",
+    "answers": {
+      "spawn_justified": {
+        "type": "noul",
+        "noul": 0.52
+      },
+      "spawn_reason": {
+        "type": "choice",
+        "choice": "should_inline",
+        "confidence": 0.77,
+        "probabilities": {
+          "context_isolation": 0.06,
+          "true_parallelism": 0.05,
+          "specialised_skill": 0.04,
+          "underspecified": 0.08,
+          "should_inline": 0.77
+        }
+      },
+      "expected_multiplier": {
+        "type": "score",
+        "score": 1,
+        "confidence": 0.71,
+        "legend": "2x",
+        "probabilities": {
+          "1x": 0.2,
+          "2x": 0.56,
+          "5x": 0.2,
+          "10x": 0.03,
+          "20x_plus": 0.01
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "inline",
+    "proceed": false,
+    "reason": "inline: spawn_justified=0.52 (min 0.65) spawn_reason=should_inline (blocked reason underspecified)",
+    "spawn_justified": 0.52,
+    "spawn_reason": "should_inline",
+    "expected_multiplier": "2x",
+    "expected_multiplier_index": 1,
+    "spawn_kind": "subagent",
+    "writes_to_shared_tree": false,
+    "thresholds": {
+      "spawn_justified_min": 0.65,
+      "blocked_spawn_reason": "underspecified",
+      "factory_fleet_requires_reason": "true_parallelism",
+      "factory_fleet_max_multiplier": "5x"
+    }
+  }
+}

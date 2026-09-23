@@ -1,0 +1,41 @@
+{
+  "slug": "secret-exposure",
+  "name": "Secret Exposure Gate",
+  "fail_mode": "closed",
+  "default_on_error": {
+    "action": "block_emit",
+    "proceed": false
+  },
+  "thresholds": {
+    "safe_to_emit_min": 0.85,
+    "allowed_exposure_kind": "none"
+  },
+  "questions": {
+    "safe_to_emit": {
+      "type": "noul",
+      "instructions": "Given the proposed output, destination, environment interpolation risk, repository visibility, and data classification, estimate the calibrated probability that emitting this content exposes no sensitive data."
+    },
+    "exposure_kind": {
+      "type": "choice",
+      "instructions": "Classify the most sensitive kind of data that would escape if this output is emitted.",
+      "criteria": {
+        "none": "No credential, customer, personal, or internal-only data is exposed.",
+        "credential": "A token, password, key, cookie, or other secret could be exposed.",
+        "customer_data": "Customer, prospect, or tenant data could be exposed.",
+        "personal_data": "Personal data about an individual could be exposed.",
+        "internal_only": "Internal-only operational details could be exposed."
+      }
+    },
+    "severity": {
+      "type": "score",
+      "instructions": "Classify the severity if the proposed output is emitted. Use the ordered criteria from least to most severe.",
+      "criteria": [
+        "none",
+        "low",
+        "moderate",
+        "high",
+        "critical"
+      ]
+    }
+  }
+}

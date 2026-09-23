@@ -1,0 +1,23 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 15.9,
+  "usage": {},
+  "answers": {
+    "tool_worth_it": {
+      "type": "noul",
+      "noul": 0.38
+    },
+    "primary_blocker": {
+      "type": "choice",
+      "choice": "already_answered",
+      "confidence": 0.82,
+      "probabilities": {
+        "already_answered": 0.69,
+        "wrong_tool": 0.08,
+        "low_signal": 0.13,
+        "user_not_needed": 0.06,
+        "none": 0.04
+      }
+    }
+  }
+}

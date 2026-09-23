@@ -1,0 +1,42 @@
+{
+  "model": "jev-latest",
+  "answers": {
+    "skill_needed": {
+      "type": "noul",
+      "noul": 0.84
+    },
+    "best_skill": {
+      "type": "choice",
+      "choice": "verification-before-completion",
+      "confidence": 0.86,
+      "probabilities": {
+        "verification-before-completion": 0.86,
+        "test-driven-development": 0.06,
+        "systematic-debugging": 0.04,
+        "copywriting": 0.01,
+        "none": 0.03
+      }
+    },
+    "match_strength": {
+      "type": "score",
+      "score": "exact",
+      "confidence": 0.82,
+      "legend": [
+        "none",
+        "weak",
+        "partial",
+        "strong",
+        "exact"
+      ],
+      "probabilities": {
+        "none": 0.01,
+        "weak": 0.02,
+        "partial": 0.07,
+        "strong": 0.08,
+        "exact": 0.82
+      }
+    }
+  },
+  "usage": {},
+  "latency_ms": 0.0
+}

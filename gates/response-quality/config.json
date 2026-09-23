@@ -1,0 +1,42 @@
+{
+  "slug": "response-quality",
+  "name": "Response Quality Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "send_response",
+    "proceed": true
+  },
+  "thresholds": {
+    "ready_to_send_min": 0.65,
+    "send_quality_min": "adequate"
+  },
+  "questions": {
+    "ready_to_send": {
+      "type": "noul",
+      "instructions": "Given the user request, draft reply, success criteria, evidence sources, and unresolved items: does the draft answer the ask well enough to send now?"
+    },
+    "send_quality": {
+      "type": "score",
+      "instructions": "Rate the overall quality of the draft response for this user request, using the evidence sources to judge whether claims are supported.",
+      "criteria": [
+        "unusable",
+        "weak",
+        "adequate",
+        "good",
+        "excellent"
+      ]
+    },
+    "main_defect": {
+      "type": "choice",
+      "instructions": "If the draft should not be sent, what is the main defect?",
+      "criteria": {
+        "none": "No material defect",
+        "incomplete": "The draft omits required parts of the answer",
+        "vague": "The draft is too generic or hedged to be useful",
+        "unsupported": "The draft asserts claims not supported by the provided evidence sources",
+        "off_target": "The draft answers the wrong question or misses the user's intent",
+        "too_long": "The draft is unnecessarily long for the request"
+      }
+    }
+  }
+}

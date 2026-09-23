@@ -1,0 +1,6 @@
+{
+  "proposed_call": "view README.md lines 1-120",
+  "prior_calls": "The same README.md range was read earlier in this turn and no file write touched README.md afterward.",
+  "elapsed_since_prior": "about 3 minutes",
+  "volatility": "static"
+}

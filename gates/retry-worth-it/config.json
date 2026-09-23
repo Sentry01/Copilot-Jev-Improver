@@ -1,0 +1,45 @@
+{
+  "slug": "retry-worth-it",
+  "name": "Retry Worth-It Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "retry_adjusted",
+    "proceed": true
+  },
+  "thresholds": {
+    "retry_will_succeed_min": 0.55,
+    "hard_stop_attempt_number": 3,
+    "retry_same_forbidden_failure_classes": [
+      "auth",
+      "unsupported"
+    ]
+  },
+  "questions": {
+    "retry_will_succeed": {
+      "type": "noul",
+      "instructions": "Given the failed tool, error summary, attempt number, actual change since the last attempt, historical failure rate, and alternative paths, estimate the calibrated probability that another attempt will succeed because something material changed."
+    },
+    "failure_class": {
+      "type": "choice",
+      "instructions": "Classify the failure cause that best explains the previous failed attempt.",
+      "criteria": {
+        "transient": "The failure appears temporary, flaky, or caused by timing.",
+        "auth": "Authentication, authorization, sign-in, permission, or token state prevented success.",
+        "wrong_target": "The attempt addressed the wrong element, path, item, branch, or target.",
+        "unsupported": "The requested operation or surface is unsupported by the chosen tool.",
+        "malformed_input": "The tool input was invalid, incomplete, or badly shaped."
+      }
+    },
+    "next_action": {
+      "type": "choice",
+      "instructions": "Choose the next action that should replace a blind retry.",
+      "criteria": {
+        "retry_same": "Retry the same tool call with no meaningful change.",
+        "retry_adjusted": "Retry after changing the selector, input, timing, or other material condition.",
+        "switch_tool": "Use a different tool or path to achieve the goal.",
+        "ask_user": "Ask the user for missing authorization or direction.",
+        "abandon": "Stop pursuing this path because it is not worth further attempts."
+      }
+    }
+  }
+}

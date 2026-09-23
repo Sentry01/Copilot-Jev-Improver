@@ -1,0 +1,41 @@
+{
+  "slug": "verification-sufficient",
+  "name": "Verification Sufficient Gate",
+  "fail_mode": "closed",
+  "default_on_error": {
+    "action": "block_completion_claim",
+    "proceed": false
+  },
+  "thresholds": {
+    "outcome_verified_min": 0.7,
+    "confidence_in_claim_min": "demonstrated"
+  },
+  "questions": {
+    "outcome_verified": {
+      "type": "noul",
+      "instructions": "Given the claimed outcome, changes made, verification performed, test coverage, and reversibility: is the evidence strong enough to support making this completion claim now?"
+    },
+    "verification_gap": {
+      "type": "choice",
+      "instructions": "What is the main gap, if any, between the evidence and the claimed completion?",
+      "criteria": {
+        "none": "The performed verification directly supports the claim",
+        "not_executed": "No relevant verification command or check was executed",
+        "partial_coverage": "Some checks ran but important changed paths or behaviours were not exercised",
+        "wrong_check": "The checks do not validate the claimed outcome",
+        "unverifiable": "The claim cannot be verified from the available evidence"
+      }
+    },
+    "confidence_in_claim": {
+      "type": "score",
+      "instructions": "How strongly does the available evidence support the completion claim?",
+      "criteria": [
+        "speculative",
+        "plausible",
+        "likely",
+        "demonstrated",
+        "proven"
+      ]
+    }
+  }
+}

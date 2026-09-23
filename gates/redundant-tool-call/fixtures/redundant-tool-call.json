@@ -1,0 +1,22 @@
+{
+  "model": "jev-fixture",
+  "latency_ms": 14.8,
+  "usage": {},
+  "answers": {
+    "is_redundant": {
+      "type": "noul",
+      "noul": 0.82
+    },
+    "reuse_strategy": {
+      "type": "choice",
+      "choice": "reuse_cache",
+      "confidence": 0.84,
+      "probabilities": {
+        "reuse_cache": 0.72,
+        "narrow_scope": 0.12,
+        "call_anyway_stale": 0.1,
+        "call_anyway_new": 0.06
+      }
+    }
+  }
+}

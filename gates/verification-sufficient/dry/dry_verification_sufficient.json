@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "name": "dry_verification_sufficient",
+    "slug": "verification-sufficient",
+    "source": "fixture",
+    "http_status": 200,
+    "latency_ms": 0.0,
+    "error": null,
+    "as_of": "2026-09-23 19:18:06 AEST",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "request_sans_auth": {
+    "model": "jev-latest",
+    "state": {
+      "claimed_outcome": "The JSON config loader now rejects malformed gate configuration before evaluation starts.",
+      "changes_made": "Added validation for missing question type fields and updated the loader path that reports invalid gate configuration.",
+      "verification_performed": "Ran python3 -m pytest tests/test_gate_config.py::test_invalid_question_type_is_rejected; exit 0 with 1 passed.",
+      "test_coverage": "The targeted test exercises the new validation branch and confirms the error is surfaced before any gate decision is made.",
+      "reversibility": "trivial"
+    },
+    "questions": {
+      "outcome_verified": {
+        "type": "noul",
+        "instructions": "Given the claimed outcome, changes made, verification performed, test coverage, and reversibility: is the evidence strong enough to support making this completion claim now?"
+      },
+      "verification_gap": {
+        "type": "choice",
+        "instructions": "What is the main gap, if any, between the evidence and the claimed completion?",
+        "criteria": {
+          "none": "The performed verification directly supports the claim",
+          "not_executed": "No relevant verification command or check was executed",
+          "partial_coverage": "Some checks ran but important changed paths or behaviours were not exercised",
+          "wrong_check": "The checks do not validate the claimed outcome",
+          "unverifiable": "The claim cannot be verified from the available evidence"
+        }
+      },
+      "confidence_in_claim": {
+        "type": "score",
+        "instructions": "How strongly does the available evidence support the completion claim?",
+        "criteria": [
+          "speculative",
+          "plausible",
+          "likely",
+          "demonstrated",
+          "proven"
+        ]
+      }
+    }
+  },
+  "response": {
+    "model": "jev-latest",
+    "answers": {
+      "outcome_verified": {
+        "type": "noul",
+        "noul": 0.86
+      },
+      "verification_gap": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 0.81,
+        "probabilities": {
+          "none": 0.81,
+          "not_executed": 0.03,
+          "partial_coverage": 0.11,
+          "wrong_check": 0.03,
+          "unverifiable": 0.02
+        }
+      },
+      "confidence_in_claim": {
+        "type": "score",
+        "score": "demonstrated",
+        "confidence": 0.79,
+        "legend": [
+          "speculative",
+          "plausible",
+          "likely",
+          "demonstrated",
+          "proven"
+        ],
+        "probabilities": {
+          "speculative": 0.01,
+          "plausible": 0.04,
+          "likely": 0.13,
+          "demonstrated": 0.79,
+          "proven": 0.03
+        }
+      }
+    },
+    "usage": {}
+  },
+  "decision": {
+    "action": "allow_completion_claim",
+    "proceed": true,
+    "reason": "allow: outcome_verified=0.86 >= 0.7 and confidence_in_claim=demonstrated >= demonstrated",
+    "outcome_verified": 0.86,
+    "verification_gap": "none",
+    "confidence_in_claim": "demonstrated",
+    "confidence_in_claim_index": 3,
+    "thresholds": {
+      "outcome_verified_min": 0.7,
+      "confidence_in_claim_min": "demonstrated",
+      "confidence_in_claim_min_index": 3
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "slug": "tool-worth-it",
+  "name": "Tool Worth-It Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "run_tool",
+    "proceed": true
+  },
+  "thresholds": {
+    "tool_worth_it_min": 0.65,
+    "gate_latency_ms_min": 2000,
+    "gate_when_est_cost_tier_not": "low"
+  },
+  "questions": {
+    "tool_worth_it": {
+      "type": "noul",
+      "instructions": "Given the user goal, evidence already gathered, proposed tool and intent, expected cost tier, and expected latency, estimate the calibrated belief that this tool call will materially improve the answer beyond what is already known."
+    },
+    "primary_blocker": {
+      "type": "choice",
+      "instructions": "If the proposed tool is not worth running, choose the main reason; choose none when the tool is worth running.",
+      "criteria": {
+        "already_answered": "The available evidence is already enough to answer.",
+        "wrong_tool": "A different or cheaper tool would be more appropriate.",
+        "low_signal": "The proposed call is likely to return noisy, irrelevant, or low-value information.",
+        "user_not_needed": "The user did not ask for this depth or the extra evidence is not needed.",
+        "none": "No blocker; the tool is worth running."
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "slug": "parallel-fanout",
+  "name": "Parallel Fanout Gate",
+  "fail_mode": "open",
+  "default_on_error": {
+    "action": "sequential",
+    "proceed": false
+  },
+  "thresholds": {
+    "independent_min": 0.6,
+    "required_ordering_risk": "none"
+  },
+  "questions": {
+    "independent": {
+      "type": "noul",
+      "instructions": "Given the proposed calls, dependency notes, shared state touched, and estimated latencies: are the calls independent enough that no call depends on another call's result?"
+    },
+    "max_parallel": {
+      "type": "score",
+      "instructions": "What is the maximum safe parallelism for this batch, considering dependencies, shared state, and rate-limit risk?",
+      "criteria": [
+        "1",
+        "2",
+        "3",
+        "5",
+        "8"
+      ]
+    },
+    "ordering_risk": {
+      "type": "choice",
+      "instructions": "What is the main ordering or concurrency risk in the proposed batch?",
+      "criteria": {
+        "none": "No meaningful ordering risk; calls can run concurrently",
+        "read_after_write": "One call may need to read data another call writes",
+        "write_conflict": "Two or more calls may write the same file or resource",
+        "rate_limit": "Parallel execution may trigger rate limits or resource contention",
+        "unknown": "Dependencies or side effects are not clear enough to batch safely"
+      }
+    }
+  }
+}

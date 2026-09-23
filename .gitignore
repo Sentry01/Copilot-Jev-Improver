@@ -1,0 +1,44 @@
+# --- secrets: never commit ---
+.env
+.env.*
+*.pem
+*.key
+**/secrets*
+**/*secret*
+**/credentials.json
+**/api_keys*
+**/token*.json
+
+# The secret-exposure *gate* is source code about secrets, not a secret. The
+# broad **/*secret* rule above would silently exclude the whole directory, so
+# it is re-included explicitly. Re-checked by tests/test_repo_hygiene.py.
+!gates/secret-exposure/
+!gates/secret-exposure/**
+
+# --- telemetry: raw, unredacted exports never leave the machine ---
+telemetry/raw/
+telemetry/**/raw_*.json
+*.sqlite
+*.sqlite3
+session-store.db*
+data.db*
+
+# --- python ---
+**/__pycache__/
+*.pyc
+*.pyo
+.Python
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- os / editor ---
+.DS_Store
+.idea/
+.vscode/
+
+# --- ci-loop: decision logs are local telemetry about real sessions ---
+# Only the aggregates from score_decisions.py are publishable.
+ci-loop/logs/*.jsonl

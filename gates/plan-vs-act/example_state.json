@@ -1,0 +1,8 @@
+{
+  "user_request": "Add retry handling to the local webhook sender and update the tests for transient HTTP failures.",
+  "estimated_steps": 5,
+  "files_likely_touched": 3,
+  "ambiguity": "The desired retry count and backoff style are not specified, but the existing sender has a clear error-handling pattern.",
+  "reversibility": "moderate",
+  "user_specified_mode": "unspecified"
+}

@@ -1,0 +1,43 @@
+{
+  "model": "jev-latest",
+  "answers": {
+    "ready_to_send": {
+      "type": "noul",
+      "noul": 0.77
+    },
+    "send_quality": {
+      "type": "score",
+      "score": "good",
+      "confidence": 0.75,
+      "legend": [
+        "unusable",
+        "weak",
+        "adequate",
+        "good",
+        "excellent"
+      ],
+      "probabilities": {
+        "unusable": 0.01,
+        "weak": 0.05,
+        "adequate": 0.17,
+        "good": 0.75,
+        "excellent": 0.02
+      }
+    },
+    "main_defect": {
+      "type": "choice",
+      "choice": "none",
+      "confidence": 0.8,
+      "probabilities": {
+        "none": 0.8,
+        "incomplete": 0.07,
+        "vague": 0.04,
+        "unsupported": 0.04,
+        "off_target": 0.03,
+        "too_long": 0.02
+      }
+    }
+  },
+  "usage": {},
+  "latency_ms": 0.0
+}

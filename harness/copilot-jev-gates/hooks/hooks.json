@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "exec": "python3",
+        "args": ["${PLUGIN_ROOT}/hooks/session_start.py"],
+        "timeoutSec": 5
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "bash|task|run_factory|web_fetch|web_search|create_pull_request|update_pull_request|create_issue|add_pr_review_comment|reply_to_comment|reply_and_resolve_review_thread|send_session_message|create_issue_artifact|slack-.*|workiq-.*|atlassian-.*|cc-828GDeeqlf0t1i29-.*|cc-pdqHAftw9cy3d8Vw-.*|cc-qoxxvytaDqWyRth7-.*",
+        "exec": "python3",
+        "args": ["${PLUGIN_ROOT}/hooks/pre_tool_use.py"],
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "type": "command",
+        "matcher": "playwright-.*|kusto-explorer-.*|open_canvas|web_fetch|web_search|bash",
+        "exec": "python3",
+        "args": ["${PLUGIN_ROOT}/hooks/post_tool_use_failure.py"],
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "exec": "python3",
+        "args": ["${PLUGIN_ROOT}/hooks/agent_stop.py"],
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
