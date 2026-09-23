@@ -38,3 +38,7 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# --- ci-loop: decision logs are local telemetry about real sessions ---
+# Only the aggregates from score_decisions.py are publishable.
+ci-loop/logs/*.jsonl

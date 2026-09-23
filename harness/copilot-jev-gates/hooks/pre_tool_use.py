@@ -31,6 +31,7 @@ from harness import (  # noqa: E402
     deny,
     emit,
     field,
+    log_decision,
     progress,
     ranged_read_args,
     read_payload,
@@ -99,7 +100,9 @@ def main() -> int:
             emit(allow())
         return 0
 
-    emit(to_decision(slug, outcome, tool_name, tool_args))
+    decision = to_decision(slug, outcome, tool_name, tool_args)
+    log_decision(slug, outcome, decision, tool_name)
+    emit(decision)
     return 0
 
 

@@ -35,6 +35,10 @@ def gates_root() -> Path:
     return Path(override).expanduser().resolve() if override else DEFAULT_GATES_ROOT
 
 
+def repo_root() -> Path:
+    return gates_root().parent
+
+
 # --------------------------------------------------------------------------
 # Deterministic pre-filters
 #
@@ -474,6 +478,43 @@ def emit(decision: dict[str, Any]) -> None:
     """Write the single final decision object. Exactly one, or it is ignored."""
     sys.stdout.write(json.dumps(decision))
     sys.stdout.flush()
+
+
+def log_decision(gate: str, outcome: dict[str, Any], decision: dict[str, Any],
+                 tool_name: str = "") -> None:
+    """Record what the gate decided, for later scoring.
+
+    Opt-in via COPILOT_JEV_LOG_DECISIONS=1. Logging automatically is the point:
+    the reference implementation this repo is modelled on required the agent to
+    remember to log its own decisions, which means the decisions least likely
+    to be recorded are the ones made when the agent is behaving badly --
+    exactly the ones worth studying.
+
+    Never raises. A logging failure must not deny a tool call, because a
+    non-zero exit from a preToolUse hook is fail-closed.
+    """
+    if os.environ.get("COPILOT_JEV_LOG_DECISIONS", "").strip().lower() not in {"1", "on", "true"}:
+        return
+    try:
+        gate_decision = outcome.get("decision") or {}
+        entry = {
+            "gate": gate,
+            "tool": tool_name,
+            "action": gate_decision.get("action") or outcome.get("action"),
+            "proceed": bool(gate_decision.get("proceed", outcome.get("proceed", True))),
+            "source": outcome.get("source", "unknown"),
+            "permission_decision": decision.get("permissionDecision"),
+            "signals": gate_decision.get("signals") or {},
+            "outcome_later": None,
+        }
+        log_path = repo_root() / "ci-loop" / "logs" / "decisions.jsonl"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        from datetime import datetime, timezone
+        entry["ts"] = datetime.now(timezone.utc).astimezone().isoformat()
+        with log_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def allow() -> dict[str, Any]:

@@ -11,6 +11,7 @@ import importlib.util
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -142,10 +143,37 @@ def main() -> int:
     for path, trap in traps:
         rows.append(run_trap(path, trap))
 
+    failures = [r for r in rows if r["result"] != "PASS"]
+
+    # `--baseline <path>` records the run so a later threshold change that
+    # fixes one trap and breaks another is visible as a diff rather than as a
+    # surprise. Writing a baseline is opt-in and explicit.
+    if "--baseline" in sys.argv:
+        idx = sys.argv.index("--baseline")
+        target = Path(sys.argv[idx + 1]) if len(sys.argv) > idx + 1 else None
+        if target is None:
+            print("--baseline requires a path", file=sys.stderr)
+            return 2
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps({
+            "captured_at": datetime.now(timezone.utc).astimezone().isoformat(),
+            "jev_mode": os.environ.get("JEV_MODE") or "(auto)",
+            "api_key_present": bool(os.environ.get("TYPESAFE_API_KEY")),
+            "passed": len(rows) - len(failures),
+            "total": len(rows),
+            "traps": {r["slug"]: {
+                "gate": r["gate"],
+                "source": r["source"],
+                "action": r["actual_action"],
+                "proceed": r["actual_proceed"],
+                "result": r["result"],
+            } for r in rows},
+        }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(f"baseline written: {target}")
+
     print(f"JEV_MODE={os.environ.get('JEV_MODE') or '(auto)'} TYPESAFE_API_KEY={'set' if os.environ.get('TYPESAFE_API_KEY') else 'unset'}")
     print_table(rows)
 
-    failures = [r for r in rows if r["result"] != "PASS"]
     if failures:
         print("\nFailures:")
         for r in failures:
